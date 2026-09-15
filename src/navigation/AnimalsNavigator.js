@@ -1,0 +1,42 @@
+/**
+ * AnimalsNavigator
+ *
+ * Stack for the "Animals" tab: List -> Add / Details.
+ */
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AnimalListScreen from '../screens/Animals/AnimalListScreen';
+import AddAnimalScreen from '../screens/Animals/AddAnimalScreen';
+import AnimalDetailsScreen from '../screens/Animals/AnimalDetailsScreen';
+import colors from '../constants/colors';
+import { ANIMALS_ROUTES } from './routes';
+
+const Stack = createNativeStackNavigator();
+
+const screenOptions = {
+  headerStyle: { backgroundColor: colors.white },
+  headerTintColor: colors.text,
+  headerTitleStyle: { fontWeight: '600' },
+};
+
+const AnimalsNavigator = () => (
+  <Stack.Navigator screenOptions={screenOptions}>
+    <Stack.Screen
+      name={ANIMALS_ROUTES.LIST}
+      component={AnimalListScreen}
+      options={{ title: 'Animals' }}
+    />
+    <Stack.Screen
+      name={ANIMALS_ROUTES.ADD}
+      component={AddAnimalScreen}
+      options={{ title: 'Add Animal' }}
+    />
+    <Stack.Screen
+      name={ANIMALS_ROUTES.DETAILS}
+      component={AnimalDetailsScreen}
+      options={{ title: 'Animal Details' }}
+    />
+  </Stack.Navigator>
+);
+
+export default AnimalsNavigator;
