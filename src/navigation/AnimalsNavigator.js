@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AnimalListScreen from '../screens/Animals/AnimalListScreen';
 import AddAnimalScreen from '../screens/Animals/AddAnimalScreen';
 import AnimalDetailsScreen from '../screens/Animals/AnimalDetailsScreen';
+import EditAnimalScreen from '../screens/Animals/EditAnimalScreen';
 import colors from '../constants/colors';
 import { ANIMALS_ROUTES } from './routes';
 
@@ -35,6 +36,11 @@ const AnimalsNavigator = () => (
       name={ANIMALS_ROUTES.DETAILS}
       component={AnimalDetailsScreen}
       options={{ title: 'Animal Details' }}
+    />
+    <Stack.Screen
+      name={ANIMALS_ROUTES.EDIT}
+      component={EditAnimalScreen}
+      options={{ title: 'Edit Animal' }}
     />
   </Stack.Navigator>
 );

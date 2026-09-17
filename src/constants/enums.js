@@ -18,3 +18,13 @@ export const SHIFT_OPTIONS = [
   { label: 'Morning', value: 'MORNING' },
   { label: 'Evening', value: 'EVENING' },
 ];
+
+/**
+ * Returns the shift that applies for a given time of day:
+ * "MORNING" from 3 AM up to (but not including) 3 PM, otherwise
+ * "EVENING". Defaults to the current time.
+ */
+export const getCurrentShift = (date = new Date()) => {
+  const hours = date.getHours();
+  return hours >= 3 && hours < 15 ? 'MORNING' : 'EVENING';
+};

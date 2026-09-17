@@ -21,6 +21,7 @@ export const ANIMALS_ROUTES = {
   LIST: 'AnimalList',
   ADD: 'AddAnimal',
   DETAILS: 'AnimalDetails',
+  EDIT: 'EditAnimal',
 };
 
 // Production stack
@@ -52,4 +53,22 @@ export const MORE_ROUTES = {
   SETTINGS: 'Settings',
   SELLER: 'Seller',
   CUSTOMER: 'Customer',
+};
+
+// Seller stack (nested inside the More stack)
+export const SELLER_ROUTES = {
+  LIST: 'SellerList',
+  DETAILS: 'SellerDetails',
+  ADD: 'AddSeller',
+  EDIT: 'EditSeller',
+  BILLING: 'Seller',
+};
+
+// Customer stack (nested inside the More stack)
+export const CUSTOMER_ROUTES = {
+  LIST: 'CustomerList',
+  DETAILS: 'CustomerDetails',
+  ADD: 'AddCustomer',
+  EDIT: 'EditCustomer',
+  BILLING: 'Customer',
 };

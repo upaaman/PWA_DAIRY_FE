@@ -27,15 +27,16 @@ import EmptyState from '../../components/EmptyState';
 import Loading from '../../components/Loading';
 import colors from '../../constants/colors';
 import { fontSize, fontWeight, spacing } from '../../constants/appConstants';
-import { SHIFT_OPTIONS } from '../../constants/enums';
+import { getCurrentShift, SHIFT_OPTIONS } from '../../constants/enums';
 import { TYPE_OPTIONS } from '../Animals/animalMeta';
 import { toISODateString } from '../../utils/date';
 import { formatCurrency } from '../../utils/format';
+import { getMilkRateForType } from '../../utils/milkRates';
 
 const initialForm = {
   customerId: null,
   animalType: null,
-  shift: null,
+  shift: getCurrentShift(),
   saleDate: new Date(),
   quantity: '',
   rate: '',
@@ -49,6 +50,7 @@ const AddSaleScreen = ({ navigation }) => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [rateTouched, setRateTouched] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     try {
@@ -70,6 +72,37 @@ const AddSaleScreen = ({ navigation }) => {
   const setField = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setErrors(prev => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleSelectCustomer = value => {
+    const customer = customers.find(c => c.id === value);
+    setForm(prev => {
+      const next = { ...prev, customerId: value };
+      if (!rateTouched && next.animalType) {
+        const autoRate = getMilkRateForType(customer, next.animalType);
+        next.rate = autoRate != null ? String(autoRate) : '';
+      }
+      return next;
+    });
+    setErrors(prev => ({ ...prev, customerId: undefined }));
+  };
+
+  const handleSelectAnimalType = value => {
+    const customer = customers.find(c => c.id === form.customerId);
+    setForm(prev => {
+      const next = { ...prev, animalType: value };
+      if (!rateTouched) {
+        const autoRate = customer ? getMilkRateForType(customer, value) : null;
+        next.rate = autoRate != null ? String(autoRate) : '';
+      }
+      return next;
+    });
+    setErrors(prev => ({ ...prev, animalType: undefined }));
+  };
+
+  const handleChangeRate = value => {
+    setField('rate', value);
+    setRateTouched(true);
   };
 
   const validate = () => {
@@ -177,7 +210,7 @@ const AddSaleScreen = ({ navigation }) => {
           placeholder="Select customer"
           value={form.customerId}
           options={customerOptions}
-          onSelect={value => setField('customerId', value)}
+          onSelect={handleSelectCustomer}
           error={errors.customerId}
         />
 
@@ -186,7 +219,7 @@ const AddSaleScreen = ({ navigation }) => {
           placeholder="Select type"
           value={form.animalType}
           options={TYPE_OPTIONS}
-          onSelect={value => setField('animalType', value)}
+          onSelect={handleSelectAnimalType}
           error={errors.animalType}
         />
 
@@ -220,7 +253,7 @@ const AddSaleScreen = ({ navigation }) => {
           label="Rate (₹ per Liter) *"
           placeholder="E.g. 120"
           value={form.rate}
-          onChangeText={value => setField('rate', value)}
+          onChangeText={handleChangeRate}
           keyboardType="numeric"
           error={errors.rate}
         />

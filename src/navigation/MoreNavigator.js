@@ -11,8 +11,15 @@ import SettingsScreen from '../screens/More/SettingsScreen';
 import SellerScreen from '../screens/More/SellerScreen';
 import CustomerScreen from '../screens/More/CustomerScreen';
 import AddSellerScreen from '../screens/Sellers/AddSellerScreen';
+import AddCustomerScreen from '../screens/Customers/AddCustomerScreen';
+import SellerListScreen from '../screens/Sellers/SellerListScreen';
+import SellerDetailsScreen from '../screens/Sellers/SellerDetailsScreen';
+import EditSellerScreen from '../screens/Sellers/EditSellerScreen';
+import CustomerListScreen from '../screens/Customers/CustomerListScreen';
+import CustomerDetailsScreen from '../screens/Customers/CustomerDetailsScreen';
+import EditCustomerScreen from '../screens/Customers/EditCustomerScreen';
 import colors from '../constants/colors';
-import { MORE_ROUTES } from './routes';
+import { MORE_ROUTES, SELLER_ROUTES, CUSTOMER_ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,20 +42,56 @@ const MoreNavigator = () => (
       options={{ title: 'Profile' }}
     />
     <Stack.Screen
-      name={MORE_ROUTES.SELLER}
-      component={SellerScreen}
+      name={SELLER_ROUTES.LIST}
+      component={SellerListScreen}
       options={{ title: 'Sellers' }}
     />
     <Stack.Screen
-      name="AddSeller"
-      component={AddSellerScreen}
+      name={SELLER_ROUTES.DETAILS}
+      component={SellerDetailsScreen}
+      options={{ title: 'Seller Details' }}
     />
     <Stack.Screen
-      name={MORE_ROUTES.CUSTOMER}
-      component={CustomerScreen}
+      name={SELLER_ROUTES.EDIT}
+      component={EditSellerScreen}
+      options={{ title: 'Edit Seller' }}
+    />
+    <Stack.Screen
+      name={SELLER_ROUTES.ADD}
+      component={AddSellerScreen}
+      options={{ title: 'Add Seller' }}
+    />
+    <Stack.Screen
+      name={SELLER_ROUTES.BILLING}
+      component={SellerScreen}
+      options={{ title: 'Seller Billing' }}
+    />
+    <Stack.Screen
+      name={CUSTOMER_ROUTES.LIST}
+      component={CustomerListScreen}
       options={{ title: 'Customers' }}
     />
-     <Stack.Screen
+    <Stack.Screen
+      name={CUSTOMER_ROUTES.DETAILS}
+      component={CustomerDetailsScreen}
+      options={{ title: 'Customer Details' }}
+    />
+    <Stack.Screen
+      name={CUSTOMER_ROUTES.EDIT}
+      component={EditCustomerScreen}
+      options={{ title: 'Edit Customer' }}
+    />
+    <Stack.Screen
+      name={CUSTOMER_ROUTES.ADD}
+      component={AddCustomerScreen}
+      options={{ title: 'Add Customer' }}
+    />
+    <Stack.Screen
+      name={CUSTOMER_ROUTES.BILLING}
+      component={CustomerScreen}
+      options={{ title: 'Customer Billing' }}
+    />
+    <Stack.Screen
       name={MORE_ROUTES.SETTINGS}
       component={SettingsScreen}
       options={{ title: 'Settings' }}

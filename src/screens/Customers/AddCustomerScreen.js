@@ -1,10 +1,10 @@
 /**
- * AddSellerScreen
+ * AddCustomerScreen
  *
- * Form to create a new seller.
+ * Form to create a new customer.
  *
  * Backend endpoint:
- *   POST /seller/create
+ *   POST /customer/create
  *
  * Request:
  *   {
@@ -44,7 +44,7 @@ const initialForm = {
   cowMilkRate: '',
 };
 
-const AddSellerScreen = ({ navigation }) => {
+const AddCustomerScreen = ({ navigation }) => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -65,17 +65,18 @@ const AddSellerScreen = ({ navigation }) => {
     const nextErrors = {};
 
     if (!form.name.trim()) {
-      nextErrors.name = 'Please enter the seller name.';
+      nextErrors.name = 'Please enter the customer name.';
     }
 
     if (!form.contact.trim()) {
-      nextErrors.contact = 'Please enter the seller contact number.';
-    } else if (!/^\d{10}$/.test(form.contact.trim())) {
-      nextErrors.contact = 'Please enter a valid 10-digit contact number.';
+      nextErrors.contact = 'Please enter the customer contact number.';
+    } else if (!/^\d{8,10}$/.test(form.contact.trim())) {
+      nextErrors.contact =
+        'Please enter a valid contact number.';
     }
 
     if (!form.address.trim()) {
-      nextErrors.address = 'Please enter the seller address.';
+      nextErrors.address = 'Please enter the customer address.';
     }
 
     ['buffaloMilkRate', 'cowMilkRate'].forEach(field => {
@@ -117,11 +118,11 @@ const AddSellerScreen = ({ navigation }) => {
     try {
       setSubmitting(true);
 
-      await post('/seller/create', payload);
+      await post('/customer/create', payload);
 
       Alert.alert(
         'Success',
-        'Seller added successfully.',
+        'Customer added successfully.',
         [
           {
             text: 'OK',
@@ -131,8 +132,9 @@ const AddSellerScreen = ({ navigation }) => {
       );
     } catch (err) {
       Alert.alert(
-        'Could not add seller',
-        err.message || 'Something went wrong. Please try again.',
+        'Could not add customer',
+        err.message ||
+          'Something went wrong. Please try again.',
       );
     } finally {
       setSubmitting(false);
@@ -150,19 +152,19 @@ const AddSellerScreen = ({ navigation }) => {
       >
         <View style={styles.header}>
           <View style={styles.iconCircle}>
-            <Text style={styles.icon}>👨‍🌾</Text>
+            <Text style={styles.icon}>👤</Text>
           </View>
 
-          <Text style={styles.title}>Add Seller</Text>
+          <Text style={styles.title}>Add Customer</Text>
 
           <Text style={styles.subtitle}>
-            Add a milk seller to your dairy records.
+            Add a milk customer to your dairy records.
           </Text>
         </View>
 
         <AppInput
-          label="Seller Name *"
-          placeholder="E.g. Pawan Seller"
+          label="Customer Name *"
+          placeholder="E.g. Amul Customer"
           value={form.name}
           onChangeText={value => setField('name', value)}
           error={errors.name}
@@ -170,7 +172,7 @@ const AddSellerScreen = ({ navigation }) => {
 
         <AppInput
           label="Contact Number *"
-          placeholder="E.g. 9898989898"
+          placeholder="E.g. 23123234"
           value={form.contact}
           onChangeText={value => setField('contact', value)}
           keyboardType="phone-pad"
@@ -180,7 +182,7 @@ const AddSellerScreen = ({ navigation }) => {
 
         <AppInput
           label="Address *"
-          placeholder="E.g. Bakhar, 487551, Khurshipar"
+          placeholder="E.g. Near Sakar Nadi Pull, 487551, Gadarwara"
           value={form.address}
           onChangeText={value => setField('address', value)}
           multiline
@@ -207,7 +209,7 @@ const AddSellerScreen = ({ navigation }) => {
         />
 
         <AppButton
-          title="Save Seller"
+          title="Save Customer"
           onPress={handleSave}
           loading={submitting}
           style={styles.saveButton}
@@ -267,4 +269,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddSellerScreen;
+export default AddCustomerScreen;

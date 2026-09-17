@@ -10,9 +10,10 @@
  * Delete uses:
  *   DELETE /animal/deleteAnimal/{id}             (AnimalController.deleteAnimalWithId)
  *
- * There is no update/edit endpoint on the backend (AnimalController only
- * exposes create/getAll/get/{id}/delete), so the Edit action is a
- * placeholder for now — it does not call any invented endpoint.
+ * Edit uses:
+ *   navigation -> EditAnimalScreen -> PATCH /animal/update/{id}
+ *   (AnimalDetailsScreen navigates to EditAnimal, passing the loaded animal
+ *   object so the edit form can pre-populate instantly.)
  */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -29,6 +30,7 @@ import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/app
 import { formatDateString } from '../../utils/date';
 import { formatCurrency, formatLiters } from '../../utils/format';
 import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
+import { ANIMALS_ROUTES } from '../../navigation/routes';
 import {
   getAnimalIcon,
   getAnimalTypeLabel,
@@ -116,10 +118,13 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
   );
 
   const handleEdit = useCallback(() => {
-    // No update/edit endpoint exists on the backend yet
-    // (AnimalController only has create/getAll/get/{id}/delete).
-    Alert.alert('Edit Animal', 'Editing animals is coming soon.');
-  }, []);
+    // PATCH /animal/update/{id} with only the changed fields — see
+    // EditAnimalScreen.
+    navigation.navigate(ANIMALS_ROUTES.EDIT, {
+      animalId: animal?.id,
+      animal,
+    });
+  }, [navigation, animal]);
 
   const handleDelete = useCallback(() => {
     Alert.alert(

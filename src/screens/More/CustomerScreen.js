@@ -34,6 +34,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
 import AppButton from '../../components/AppButton';
 import AppCard from '../../components/AppCard';
@@ -46,21 +47,25 @@ import colors from '../../constants/colors';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import { getAnimalIcon, getAnimalTypeLabel } from '../Animals/animalMeta';
 import { getShiftLabel } from '../../constants/enums';
+import { CUSTOMER_ROUTES } from '../../navigation/routes';
 import { formatDateString } from '../../utils/date';
 import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
 import { formatCurrency, formatLiters } from '../../utils/format';
 import { printOrDownloadBill, shareBillSummary } from '../../utils/pdfService';
 
-const CustomerScreen = () => {
+const CustomerScreen = ({navigation, route}) => {
+  const isFocused = useIsFocused();
   // Customers list state
   const [customers, setCustomers] = useState([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
   const [customersError, setCustomersError] = useState(null);
 
-  // Selected customer selection
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  // Selected customer selection. A customerId passed via navigation (from
+  // CustomerDetailsScreen) opens straight into the billing view.
+  const preselectedCustomerId = route.params?.customerId ?? null;
+  const [selectedCustomerId, setSelectedCustomerId] = useState(preselectedCustomerId);
   const [selectError, setSelectError] = useState(null);
-  const [isDetailsActive, setIsDetailsActive] = useState(false);
+  const [isDetailsActive, setIsDetailsActive] = useState(Boolean(preselectedCustomerId));
 
   // Date Range state
   const [range, setRange] = useState(() => ({
@@ -92,9 +97,21 @@ const CustomerScreen = () => {
     }
   }, []);
 
+  // Reload customers whenever the screen gains focus so a customer added
+  // on the AddCustomer screen shows up immediately after returning.
   useEffect(() => {
-    loadCustomers();
-  }, [loadCustomers]);
+    if (isFocused) {
+      loadCustomers();
+    }
+  }, [isFocused, loadCustomers]);
+
+  // React to a customer being handed to this screen (from CustomerDetails).
+  useEffect(() => {
+    if (route.params?.customerId) {
+      setSelectedCustomerId(route.params.customerId);
+      setIsDetailsActive(true);
+    }
+  }, [route.params?.customerId]);
 
   // 2. Fetch sales when details view is active and range / customer changes
   const loadSales = useCallback(async () => {
@@ -147,11 +164,6 @@ const CustomerScreen = () => {
     }
     setSelectError(null);
     setIsDetailsActive(true);
-  };
-
-  const handleResetCustomer = () => {
-    setIsDetailsActive(false);
-    setSales([]);
   };
 
   // Compute Active Customer info (from 0th sale record or selected customer object)
@@ -282,6 +294,30 @@ const CustomerScreen = () => {
                 onPress={handleGetDetails}
                 style={styles.getDetailsBtn}
               />
+
+              {/* Divider + "Add new customer" tile — separate from the primary action */}
+              <View style={styles.addDividerRow}>
+                <View style={styles.addDividerLine} />
+                <Text style={styles.addDividerText}>or</Text>
+                <View style={styles.addDividerLine} />
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [styles.addPartyTile, pressed && styles.addPartyTilePressed]}
+                onPress={() => navigation.navigate(CUSTOMER_ROUTES.ADD)}
+                hitSlop={4}
+              >
+                <View style={styles.addPartyBadge}>
+                  <Text style={styles.addPartyBadgeText}>+</Text>
+                </View>
+                <View style={styles.addPartyTextGroup}>
+                  <Text style={styles.addPartyTitle}>Add New Customer</Text>
+                  <Text style={styles.addPartySubtitle}>
+                    Don't find your customer here? Register a new one.
+                  </Text>
+                </View>
+                <Text style={styles.addPartyChevron}>›</Text>
+              </Pressable>
             </View>
           </AppCard>
         </ScrollView>
@@ -307,7 +343,7 @@ const CustomerScreen = () => {
         }
         ListHeaderComponent={
           <>
-            {/* Top Bar with Selected Customer & Change button */}
+            {/* Selected Customer banner */}
             <View style={styles.customerHeaderCard}>
               <View style={styles.customerHeaderLeft}>
                 <View style={styles.customerAvatarBadge}>
@@ -320,13 +356,6 @@ const CustomerScreen = () => {
                   </Text>
                 </View>
               </View>
-              <Pressable
-                style={styles.changeCustomerBtn}
-                onPress={handleResetCustomer}
-                hitSlop={8}
-              >
-                <Text style={styles.changeCustomerBtnText}>Change</Text>
-              </Pressable>
             </View>
 
             {/* Action Row: Generate Bill Button */}
@@ -522,6 +551,74 @@ const styles = StyleSheet.create({
   getDetailsBtn: {
     marginTop: spacing.xs,
   },
+  addDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  addDividerLine: {
+    flex: 1,
+    height: 1,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  addDividerText: {
+    fontSize: 10,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  addPartyTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: colors.info,
+    borderStyle: 'dashed',
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  addPartyTilePressed: {
+    backgroundColor: '#DBEAFE',
+  },
+  addPartyBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.info,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addPartyBadgeText: {
+    color: colors.white,
+    fontSize: 22,
+    fontWeight: fontWeight.bold,
+    lineHeight: 24,
+  },
+  addPartyTextGroup: {
+    flex: 1,
+  },
+  addPartyTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+  },
+  addPartySubtitle: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginTop: 2,
+    lineHeight: 15,
+  },
+  addPartyChevron: {
+    fontSize: 24,
+    color: colors.info,
+    fontWeight: fontWeight.semibold,
+  },
 
   /* Active Details Styles */
   customerHeaderCard: {
@@ -565,19 +662,6 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     color: colors.textSecondary,
     marginTop: 1,
-  },
-  changeCustomerBtn: {
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  changeCustomerBtnText: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold,
-    color: colors.primary,
   },
   actionsHeaderRow: {
     flexDirection: 'row',

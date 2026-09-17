@@ -27,6 +27,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
 import AppButton from '../../components/AppButton';
 import AppCard from '../../components/AppCard';
@@ -39,21 +40,25 @@ import colors from '../../constants/colors';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import { getAnimalIcon, getAnimalTypeLabel } from '../Animals/animalMeta';
 import { getShiftLabel } from '../../constants/enums';
+import { SELLER_ROUTES } from '../../navigation/routes';
 import { formatDateString } from '../../utils/date';
 import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
 import { formatCurrency, formatLiters } from '../../utils/format';
 import { printOrDownloadBill, shareBillSummary } from '../../utils/pdfService';
 
-const SellerScreen = ({ navigation }) => {
+const SellerScreen = ({ navigation, route }) => {
+  const isFocused = useIsFocused();
   // Sellers list state
   const [sellers, setSellers] = useState([]);
   const [loadingSellers, setLoadingSellers] = useState(true);
   const [sellersError, setSellersError] = useState(null);
 
-  // Selected seller selection
-  const [selectedSellerId, setSelectedSellerId] = useState(null);
+  // Selected seller selection. A sellerId passed via navigation (from
+  // SellerDetailsScreen) opens straight into the billing view.
+  const preselectedSellerId = route.params?.sellerId ?? null;
+  const [selectedSellerId, setSelectedSellerId] = useState(preselectedSellerId);
   const [selectError, setSelectError] = useState(null);
-  const [isDetailsActive, setIsDetailsActive] = useState(false);
+  const [isDetailsActive, setIsDetailsActive] = useState(Boolean(preselectedSellerId));
 
   // Date Range state
   const [range, setRange] = useState(() => ({
@@ -85,9 +90,21 @@ const SellerScreen = ({ navigation }) => {
     }
   }, []);
 
+  // Reload sellers whenever the screen gains focus so a seller added on
+  // the AddSeller screen shows up immediately after returning.
   useEffect(() => {
-    loadSellers();
-  }, [loadSellers]);
+    if (isFocused) {
+      loadSellers();
+    }
+  }, [isFocused, loadSellers]);
+
+  // React to a seller being handed to this screen (e.g. from SellerDetails).
+  useEffect(() => {
+    if (route.params?.sellerId) {
+      setSelectedSellerId(route.params.sellerId);
+      setIsDetailsActive(true);
+    }
+  }, [route.params?.sellerId]);
 
   // 2. Fetch purchases when details view is active and range / seller changes
   const loadPurchases = useCallback(async () => {
@@ -140,11 +157,6 @@ const SellerScreen = ({ navigation }) => {
     }
     setSelectError(null);
     setIsDetailsActive(true);
-  };
-
-  const handleResetSeller = () => {
-    setIsDetailsActive(false);
-    setPurchases([]);
   };
 
   // Compute Active Seller info (from 0th purchase record or selected seller object)
@@ -273,11 +285,30 @@ const SellerScreen = ({ navigation }) => {
                 onPress={handleGetDetails}
                 style={styles.getDetailsBtn}
               />
-              <AppButton
-                title="+ Add Seller"
-                onPress={() => navigation.navigate('AddSeller')}
-                style={styles.addSellerBtn}
-              />
+
+              {/* Divider + "Add new seller" tile — separate from the primary action */}
+              <View style={styles.addDividerRow}>
+                <View style={styles.addDividerLine} />
+                <Text style={styles.addDividerText}>or</Text>
+                <View style={styles.addDividerLine} />
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [styles.addPartyTile, pressed && styles.addPartyTilePressed]}
+                onPress={() => navigation.navigate(SELLER_ROUTES.ADD)}
+                hitSlop={4}
+              >
+                <View style={styles.addPartyBadge}>
+                  <Text style={styles.addPartyBadgeText}>+</Text>
+                </View>
+                <View style={styles.addPartyTextGroup}>
+                  <Text style={styles.addPartyTitle}>Add New Seller</Text>
+                  <Text style={styles.addPartySubtitle}>
+                    Don't find your seller here? Register a new one.
+                  </Text>
+                </View>
+                <Text style={styles.addPartyChevron}>›</Text>
+              </Pressable>
             </View>
           </AppCard>
         </ScrollView>
@@ -303,7 +334,7 @@ const SellerScreen = ({ navigation }) => {
         }
         ListHeaderComponent={
           <>
-            {/* Top Bar with Selected Seller & Change button */}
+            {/* Selected Seller banner */}
             <View style={styles.sellerHeaderCard}>
               <View style={styles.sellerHeaderLeft}>
                 <View style={styles.sellerAvatarBadge}>
@@ -316,13 +347,6 @@ const SellerScreen = ({ navigation }) => {
                   </Text>
                 </View>
               </View>
-              <Pressable
-                style={styles.changeSellerBtn}
-                onPress={handleResetSeller}
-                hitSlop={8}
-              >
-                <Text style={styles.changeSellerBtnText}>Change</Text>
-              </Pressable>
             </View>
 
             {/* Action Row: Generate Bill Button */}
@@ -518,10 +542,74 @@ const styles = StyleSheet.create({
   getDetailsBtn: {
     marginTop: spacing.xs,
   },
-  addSellerBtn: {
-  marginTop: spacing.xs,
-  marginBottom: spacing.xs,
-},
+  addDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  addDividerLine: {
+    flex: 1,
+    height: 1,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  addDividerText: {
+    fontSize: 10,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  addPartyTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderStyle: 'dashed',
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  addPartyTilePressed: {
+    backgroundColor: colors.primaryLight,
+  },
+  addPartyBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addPartyBadgeText: {
+    color: colors.white,
+    fontSize: 22,
+    fontWeight: fontWeight.bold,
+    lineHeight: 24,
+  },
+  addPartyTextGroup: {
+    flex: 1,
+  },
+  addPartyTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+  },
+  addPartySubtitle: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginTop: 2,
+    lineHeight: 15,
+  },
+  addPartyChevron: {
+    fontSize: 24,
+    color: colors.primary,
+    fontWeight: fontWeight.semibold,
+  },
 
   /* Active Details Styles */
   sellerHeaderCard: {
@@ -565,19 +653,6 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     color: colors.textSecondary,
     marginTop: 1,
-  },
-  changeSellerBtn: {
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  changeSellerBtnText: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold,
-    color: colors.primary,
   },
   actionsHeaderRow: {
     flexDirection: 'row',

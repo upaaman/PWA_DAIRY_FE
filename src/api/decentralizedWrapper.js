@@ -5,7 +5,7 @@
  * No authentication/JWT handling yet — Phase 1.
  *
  * Usage:
- *   import { get, post, put, del } from '../api/decentralizedWrapper';
+ *   import { get, post, put, patch, del } from '../api/decentralizedWrapper';
  *   const animals = await get('/animals');
  *   const created = await post('/animals', { name: 'Lakshmi' });
  */
@@ -63,7 +63,14 @@ export const put = (endpoint, body, options = {}) =>
     body: JSON.stringify(body),
   });
 
+export const patch = (endpoint, body, options = {}) =>
+  request(endpoint, {
+    ...options,
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+
 export const del = (endpoint, options = {}) =>
   request(endpoint, { ...options, method: 'DELETE' });
 
-export default { get, post, put, del };
+export default { get, post, put, patch, del };

@@ -27,13 +27,13 @@ import EmptyState from '../../components/EmptyState';
 import Loading from '../../components/Loading';
 import colors from '../../constants/colors';
 import { spacing } from '../../constants/appConstants';
-import { SHIFT_OPTIONS } from '../../constants/enums';
+import { getCurrentShift, SHIFT_OPTIONS } from '../../constants/enums';
 import { toISODateString } from '../../utils/date';
 
 const initialForm = {
   animalId: null,
   quantity: '',
-  shift: null,
+  shift: getCurrentShift(),
   productionDate: new Date(),
 };
 
