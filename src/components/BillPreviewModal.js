@@ -46,10 +46,29 @@ const BillPreviewModal = ({
     startDate,
     endDate,
     seller,
-    purchases = [],
+    customer,
+    purchases,
+    sales,
     totalQuantity = 0,
     totalAmount = 0,
   } = billData;
+
+  // Generic "party" support — see purePdfBuilder.js for the full
+  // explanation. Seller bill = money we pay out; Customer bill = money
+  // owed to us. Both entities share the same { name, contact, address }
+  // shape, so only labels/wording differ between the two.
+  const partyRole = billData.partyRole || (seller ? 'seller' : 'customer');
+  const isSeller = partyRole === 'seller';
+  const party = seller || customer;
+  const transactions = purchases || sales || [];
+  const dateField = billData.dateField || (isSeller ? 'purchaseDate' : 'saleDate');
+
+  const previewTitle = isSeller ? 'Payment Bill Preview' : 'Sales Invoice Preview';
+  const billTitleText = isSeller ? 'Payment Bill' : 'Sales Invoice';
+  const billSubtitleText = isSeller ? '(To be paid to Seller)' : '(To be paid by Customer)';
+  const partyLabel = isSeller ? 'Seller Details' : 'Buyer Details';
+  const amountCardTitle = isSeller ? 'Amount to be Paid' : 'Amount Receivable';
+  const remarksLabel = isSeller ? 'Milk Purchase' : 'Milk Sale';
 
   const formattedBillDate =
     typeof billDate === 'string'
@@ -74,7 +93,7 @@ const BillPreviewModal = ({
           {/* Top Bar */}
           <View style={styles.topBar}>
             <View>
-              <Text style={styles.topBarTitle}>Payment Bill Preview</Text>
+              <Text style={styles.topBarTitle}>{previewTitle}</Text>
               <Text style={styles.topBarSubtitle}>Invoice #{billNumber}</Text>
             </View>
             <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={10}>
@@ -115,8 +134,8 @@ const BillPreviewModal = ({
               {/* Title & Meta Row */}
               <View style={styles.titleMetaRow}>
                 <View>
-                  <Text style={styles.billHeading}>Payment Bill</Text>
-                  <Text style={styles.billSubheading}>(To be paid to Seller)</Text>
+                  <Text style={styles.billHeading}>{billTitleText}</Text>
+                  <Text style={styles.billSubheading}>{billSubtitleText}</Text>
                 </View>
 
                 <View style={styles.metaTable}>
@@ -137,25 +156,25 @@ const BillPreviewModal = ({
                 </View>
               </View>
 
-              {/* Seller Details */}
+              {/* Party Details (Seller or Buyer) */}
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionHeaderText}>Seller Details</Text>
+                <Text style={styles.sectionHeaderText}>{partyLabel}</Text>
               </View>
               <View style={styles.sellerInfoTable}>
                 <View style={styles.sellerRow}>
                   <Text style={styles.sellerKey}>Name</Text>
                   <Text style={styles.sellerColon}>:</Text>
-                  <Text style={styles.sellerVal}>{seller?.name || '—'}</Text>
+                  <Text style={styles.sellerVal}>{party?.name || '—'}</Text>
                 </View>
                 <View style={styles.sellerRow}>
                   <Text style={styles.sellerKey}>Contact</Text>
                   <Text style={styles.sellerColon}>:</Text>
-                  <Text style={styles.sellerVal}>{seller?.contact || '—'}</Text>
+                  <Text style={styles.sellerVal}>{party?.contact || '—'}</Text>
                 </View>
                 <View style={styles.sellerRow}>
                   <Text style={styles.sellerKey}>Address</Text>
                   <Text style={styles.sellerColon}>:</Text>
-                  <Text style={styles.sellerVal}>{seller?.address || '—'}</Text>
+                  <Text style={styles.sellerVal}>{party?.address || '—'}</Text>
                 </View>
               </View>
 
@@ -173,12 +192,12 @@ const BillPreviewModal = ({
                 </View>
 
                 {/* Rows */}
-                {purchases.length === 0 ? (
+                {transactions.length === 0 ? (
                   <View style={styles.emptyTableRow}>
-                    <Text style={styles.emptyTableText}>No purchase records found.</Text>
+                    <Text style={styles.emptyTableText}>No records found.</Text>
                   </View>
                 ) : (
-                  purchases.map((item, index) => (
+                  transactions.map((item, index) => (
                     <View
                       key={item.id || index}
                       style={[
@@ -188,7 +207,7 @@ const BillPreviewModal = ({
                     >
                       <Text style={[styles.td, styles.colNo]}>{index + 1}</Text>
                       <Text style={[styles.td, styles.colDate]}>
-                        {formatDateString(item.purchaseDate) || '—'}
+                        {formatDateString(item[dateField]) || '—'}
                       </Text>
                       <Text style={[styles.td, styles.colType]}>{item.animalType || '—'}</Text>
                       <Text style={[styles.td, styles.colShift]}>{item.shift || '—'}</Text>
@@ -215,9 +234,9 @@ const BillPreviewModal = ({
 
               {/* Bottom Summary Cards */}
               <View style={styles.bottomSummary}>
-                {/* Amount to be Paid */}
+                {/* Amount to be Paid / Receivable */}
                 <View style={styles.amountPaidCard}>
-                  <Text style={styles.amountPaidTitle}>Amount to be Paid</Text>
+                  <Text style={styles.amountPaidTitle}>{amountCardTitle}</Text>
                   <Text style={styles.amountPaidValue}>{formatCurrency(totalAmount)}</Text>
                   <Text style={styles.amountPaidWords}>({words})</Text>
                 </View>
@@ -238,7 +257,7 @@ const BillPreviewModal = ({
                     </View>
                     <View style={styles.payRow}>
                       <Text style={styles.payKey}>Remarks</Text>
-                      <Text style={styles.payVal}>: Milk Purchase</Text>
+                      <Text style={styles.payVal}>: {remarksLabel}</Text>
                     </View>
                   </View>
                 </View>

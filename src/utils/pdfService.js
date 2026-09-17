@@ -31,10 +31,23 @@ export const buildBillTextReceipt = billData => {
     startDate,
     endDate,
     seller,
-    purchases = [],
+    customer,
+    purchases,
+    sales,
     totalQuantity = 0,
     totalAmount = 0,
   } = billData;
+
+  // See purePdfBuilder.js for the same generic seller/customer handling.
+  const partyRole = billData.partyRole || (seller ? 'seller' : 'customer');
+  const isSeller = partyRole === 'seller';
+  const party = seller || customer;
+  const transactions = purchases || sales || [];
+  const dateField = billData.dateField || (isSeller ? 'purchaseDate' : 'saleDate');
+
+  const headingLabel = isSeller ? 'PAYMENT BILL' : 'SALES INVOICE';
+  const partyLabel = isSeller ? 'SELLER DETAILS' : 'BUYER DETAILS';
+  const transactionsLabel = isSeller ? 'PURCHASE DETAILS' : 'SALE DETAILS';
 
   const formattedBillDate =
     typeof billDate === 'string'
@@ -50,7 +63,7 @@ export const buildBillTextReceipt = billData => {
   const words = amountToWords(totalAmount);
 
   const lines = [
-    `*AKKU DADA DAIRY - PAYMENT BILL*`,
+    `*AKKU DADA DAIRY - ${headingLabel}*`,
     `Healthy Animals | Fresh Milk | Better Tomorrow`,
     `Bagicha Farm, Gram Khurshipar 487551`,
     `Ph: +91 9752248080 | info@akkudadadairy.in`,
@@ -59,16 +72,16 @@ export const buildBillTextReceipt = billData => {
     `*Bill Date* : ${formattedBillDate}`,
     `*Period*    : ${formattedStartDate} to ${formattedEndDate}`,
     `----------------------------------------`,
-    `*SELLER DETAILS*`,
-    `Name    : ${seller?.name || '—'}`,
-    `Contact : ${seller?.contact || '—'}`,
-    `Address : ${seller?.address || '—'}`,
+    `*${partyLabel}*`,
+    `Name    : ${party?.name || '—'}`,
+    `Contact : ${party?.contact || '—'}`,
+    `Address : ${party?.address || '—'}`,
     `----------------------------------------`,
-    `*PURCHASE DETAILS*`,
+    `*${transactionsLabel}*`,
   ];
 
-  purchases.forEach((p, idx) => {
-    const d = formatDateString(p.purchaseDate) || '—';
+  transactions.forEach((p, idx) => {
+    const d = formatDateString(p[dateField]) || '—';
     const a = p.animalType || '—';
     const s = p.shift || '—';
     const q = Number(p.quantity || 0).toFixed(2);
@@ -89,10 +102,22 @@ export const buildBillTextReceipt = billData => {
   return lines.join('\n');
 };
 
+/**
+ * Builds the export filename: "Sale_<customerName>_<start>_<end>" for a
+ * customer bill, "Purchase_<sellerName>_<start>_<end>" for a seller bill.
+ * `billNumber` is already "<name>_<start>_<end>" (see Seller/CustomerScreen),
+ * so this just prefixes it with the right word instead of the generic "Bill_".
+ */
+const getBillFilename = billData => {
+  const isSeller = (billData.partyRole || (billData.seller ? 'seller' : 'customer')) === 'seller';
+  const prefix = isSeller ? 'Purchase' : 'Sale';
+  return `${prefix}_${billData.billNumber}`;
+};
+
 export const printOrDownloadBill = async billData => {
   try {
     const dataUri = generatePdfDataUri(billData);
-    const filename = `Bill_${billData.billNumber}`;
+    const filename = getBillFilename(billData);
 
     // Share.open with a real file attachment (via react-native-share) —
     // this is what actually gives the "Save to Drive/Files, Print,
@@ -114,8 +139,8 @@ export const printOrDownloadBill = async billData => {
       url: dataUri,
       type: 'application/pdf',
       filename,
-      title: `Download / Share Bill - ${billData.billNumber}`,
-      subject: `Payment Bill - ${billData.billNumber}`,
+      title: `Download / Share - ${filename}`,
+      subject: filename,
       saveToFiles: true,
       failOnCancel: false,
       useInternalStorage: true,
@@ -130,7 +155,7 @@ export const printOrDownloadBill = async billData => {
 export const shareBillSummary = async billData => {
   try {
     const dataUri = generatePdfDataUri(billData);
-    const filename = `Bill_${billData.billNumber}`;
+    const filename = getBillFilename(billData);
     const textReceipt = buildBillTextReceipt(billData);
 
     const result = await Share.open({
@@ -138,8 +163,8 @@ export const shareBillSummary = async billData => {
       type: 'application/pdf',
       filename,
       message: textReceipt,
-      title: `Share Bill - ${billData.billNumber}`,
-      subject: `Payment Bill - ${billData.billNumber}`,
+      title: `Share - ${filename}`,
+      subject: filename,
       failOnCancel: false,
       useInternalStorage: true,
     });

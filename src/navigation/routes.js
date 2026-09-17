@@ -51,4 +51,5 @@ export const MORE_ROUTES = {
   PROFILE: 'Profile',
   SETTINGS: 'Settings',
   SELLER: 'Seller',
+  CUSTOMER: 'Customer',
 };

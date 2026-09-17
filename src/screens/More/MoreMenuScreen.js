@@ -14,6 +14,7 @@ import { MORE_ROUTES } from '../../navigation/routes';
 const MENU_ITEMS = [
   { label: 'Profile', route: MORE_ROUTES.PROFILE },
   { label: 'Seller', route: MORE_ROUTES.SELLER },
+  { label: 'Customer', route: MORE_ROUTES.CUSTOMER },
   { label: 'Settings', route: MORE_ROUTES.SETTINGS },
 ];
 

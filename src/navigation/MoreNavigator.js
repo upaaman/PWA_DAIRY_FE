@@ -9,6 +9,7 @@ import MoreMenuScreen from '../screens/More/MoreMenuScreen';
 import ProfileScreen from '../screens/More/ProfileScreen';
 import SettingsScreen from '../screens/More/SettingsScreen';
 import SellerScreen from '../screens/More/SellerScreen';
+import CustomerScreen from '../screens/More/CustomerScreen';
 import colors from '../constants/colors';
 import { MORE_ROUTES } from './routes';
 
@@ -36,6 +37,11 @@ const MoreNavigator = () => (
       name={MORE_ROUTES.SELLER}
       component={SellerScreen}
       options={{ title: 'Sellers' }}
+    />
+    <Stack.Screen
+      name={MORE_ROUTES.CUSTOMER}
+      component={CustomerScreen}
+      options={{ title: 'Customers' }}
     />
      <Stack.Screen
       name={MORE_ROUTES.SETTINGS}
