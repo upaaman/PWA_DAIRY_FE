@@ -1,7 +1,7 @@
 /**
  * BottomTabNavigator
  *
- * Main bottom tab bar: Home, Animals, Production, Sales, More.
+ * Main bottom tab bar: Home, Animals, Production, Purchase, Sales, More.
  * Each tab (except Home) renders its own stack navigator so it can
  * push sub-screens (e.g. Animals -> Add Animal) without extra nesting
  * at the root level.
@@ -14,6 +14,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/Dashboard';
 import AnimalsNavigator from './AnimalsNavigator';
 import ProductionNavigator from './ProductionNavigator';
+import PurchaseNavigator from './PurchaseNavigator';
 import SalesNavigator from './SalesNavigator';
 import MoreNavigator from './MoreNavigator';
 import colors from '../constants/colors';
@@ -25,6 +26,7 @@ const TAB_ICONS = {
   [TABS.HOME]: '🏠',
   [TABS.ANIMALS]: '🐄',
   [TABS.PRODUCTION]: '🥛',
+  [TABS.PURCHASE]: '🚚',
   [TABS.SALES]: '💰',
   [TABS.MORE]: '⋯',
 };
@@ -59,6 +61,11 @@ const BottomTabNavigator = () => (
       name={TABS.PRODUCTION}
       component={ProductionNavigator}
       options={{ title: 'Production' }}
+    />
+    <Tab.Screen
+      name={TABS.PURCHASE}
+      component={PurchaseNavigator}
+      options={{ title: 'Purchase' }}
     />
     <Tab.Screen
       name={TABS.SALES}

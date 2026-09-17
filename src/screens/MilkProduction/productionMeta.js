@@ -20,9 +20,9 @@
 import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
 
 export const getDefaultFilters = () => {
-  const { startDate, endDate } = getDateRangeForKey(RANGE_KEYS.THIS_WEEK);
+  const { startDate, endDate } = getDateRangeForKey(RANGE_KEYS.THIS_MONTH);
   return {
-    rangeKey: RANGE_KEYS.THIS_WEEK,
+    rangeKey: RANGE_KEYS.THIS_MONTH,
     startDate,
     endDate,
     animalType: null,

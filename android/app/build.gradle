@@ -103,6 +103,12 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            // Testing-only: allow plain HTTP so this build can reach the
+            // Spring Boot backend over the local network (it has no HTTPS
+            // set up). Release builds default this to "false". Remove/
+            // tighten this (e.g. a network_security_config.xml scoped to
+            // your dev machine's IP) before any real distribution.
+            manifestPlaceholders = [usesCleartextTraffic: "true"]
         }
     }
 }

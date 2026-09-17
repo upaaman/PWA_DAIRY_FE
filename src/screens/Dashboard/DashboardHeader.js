@@ -14,8 +14,8 @@ const DashboardHeader = () => {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.greeting}>Good Morning</Text>
-        <Text style={styles.title}>Dairy Farm Overview</Text>
+        <Text style={styles.greeting}>Good Morning,</Text>
+        <Text style={styles.title}>Mr Akash Ji</Text>
       </View>
 
       <View style={styles.bellButton}>

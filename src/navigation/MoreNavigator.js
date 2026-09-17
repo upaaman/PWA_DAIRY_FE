@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MoreMenuScreen from '../screens/More/MoreMenuScreen';
 import ProfileScreen from '../screens/More/ProfileScreen';
 import SettingsScreen from '../screens/More/SettingsScreen';
+import SellerScreen from '../screens/More/SellerScreen';
 import colors from '../constants/colors';
 import { MORE_ROUTES } from './routes';
 
@@ -32,6 +33,11 @@ const MoreNavigator = () => (
       options={{ title: 'Profile' }}
     />
     <Stack.Screen
+      name={MORE_ROUTES.SELLER}
+      component={SellerScreen}
+      options={{ title: 'Sellers' }}
+    />
+     <Stack.Screen
       name={MORE_ROUTES.SETTINGS}
       component={SettingsScreen}
       options={{ title: 'Settings' }}

@@ -30,7 +30,7 @@ const QuickRangeChips = ({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={style}
+      style={[styles.scrollView, style]}
       contentContainerStyle={[styles.row, contentContainerStyle]}
     >
       {rangeKeys.map(key => (
@@ -46,8 +46,15 @@ const QuickRangeChips = ({
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    // Hard-pin the ScrollView to its content height. Without this, a
+    // horizontal ScrollView with no explicit height can end up being
+    // measured much taller than its pill-row content in some flex
+    // layouts, leaving a large empty gap below the chips.
+    flexGrow: 0,
+    flexShrink: 0,
+  },
   row: {
-    flexGrow: 1,
     alignItems: 'flex-start',
     paddingHorizontal: spacing.lg,
   },

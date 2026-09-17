@@ -207,6 +207,8 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   chipsScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
     marginTop: spacing.md,
   },
   chipsRow: {

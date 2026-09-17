@@ -20,13 +20,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { del, get } from '../../api/decentralizedWrapper';
 import AppCard from '../../components/AppCard';
 import AppButton from '../../components/AppButton';
+import DateRangeFilter from '../../components/DateRangeFilter';
+import SimpleBarChart from '../../components/SimpleBarChart';
 import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import { formatDateString } from '../../utils/date';
 import { formatCurrency, formatLiters } from '../../utils/format';
-import { PRODUCTION_ROUTES, TABS } from '../../navigation/routes';
+import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
 import {
   getAnimalIcon,
   getAnimalTypeLabel,
@@ -34,10 +36,16 @@ import {
   getStatusColor,
   getStatusLabel,
 } from './animalMeta';
+import { bucketByDay, computeShiftBreakdown } from './animalProductionMeta';
 import DetailRow from './DetailRow';
 import ProductionRecordRow from './ProductionRecordRow';
+import SectionTabs from './SectionTabs';
+import StatBreakdownRow from '../MilkProduction/StatBreakdownRow';
 
-const RECENT_RECORDS_LIMIT = 5;
+const TABS_CONFIG = [
+  { key: 'OVERVIEW', label: 'Overview' },
+  { key: 'HISTORY', label: 'Production History' },
+];
 
 // Defined outside the screen so it isn't re-created every render
 // (navigation.setOptions needs a stable component reference).
@@ -58,6 +66,12 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
   const [animal, setAnimal] = useState(null);
   const [animalLoading, setAnimalLoading] = useState(true);
   const [animalError, setAnimalError] = useState(null);
+
+  const [range, setRange] = useState(() => ({
+    rangeKey: RANGE_KEYS.THIS_MONTH,
+    ...getDateRangeForKey(RANGE_KEYS.THIS_MONTH),
+  }));
+  const [activeTab, setActiveTab] = useState('OVERVIEW');
 
   const [records, setRecords] = useState([]);
   const [recordsLoading, setRecordsLoading] = useState(true);
@@ -82,14 +96,17 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     try {
       setRecordsLoading(true);
       setRecordsError(null);
-      const response = await get(`/milkProduction/getAll?animalId=${animalId}`);
+      const { startDate, endDate } = toQueryDateRange(range);
+      const query = `?animalId=${animalId}&startDate=${startDate}&endDate=${endDate}`;
+      const response = await get(`/milkProduction/getAll${query}`);
       setRecords(Array.isArray(response) ? response : []);
     } catch (err) {
       setRecordsError(err);
     } finally {
       setRecordsLoading(false);
     }
-  }, [animalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animalId, range.startDate, range.endDate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -143,30 +160,28 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     });
   }, [navigation, animal, handleEdit, handleDelete]);
 
-  const productionSummary = useMemo(() => {
-    if (!records.length) {
-      return { total: 0, average: 0, recent: [] };
-    }
+  const totalProduction = useMemo(
+    () => records.reduce((sum, record) => sum + Number(record.quantity || 0), 0),
+    [records],
+  );
 
-    const total = records.reduce(
-      (sum, record) => sum + Number(record.quantity || 0),
-      0,
-    );
-    const distinctDays = new Set(records.map(record => record.productionDate))
-      .size;
-    const average = distinctDays > 0 ? total / distinctDays : 0;
+  const chartData = useMemo(
+    () => bucketByDay(records, range.startDate, range.endDate),
+    [records, range.startDate, range.endDate],
+  );
 
-    const recent = [...records]
-      .sort((a, b) => {
+  const shiftBreakdown = useMemo(() => computeShiftBreakdown(records), [records]);
+
+  const historyRecords = useMemo(
+    () =>
+      [...records].sort((a, b) => {
         if (a.productionDate === b.productionDate) {
           return (b.id || 0) - (a.id || 0);
         }
         return (b.productionDate || '').localeCompare(a.productionDate || '');
-      })
-      .slice(0, RECENT_RECORDS_LIMIT);
-
-    return { total, average, recent };
-  }, [records]);
+      }),
+    [records],
+  );
 
   if (animalLoading) {
     return <Loading message="Loading animal..." />;
@@ -198,13 +213,13 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.banner}>
-        <Text style={styles.bannerIcon}>{getAnimalIcon(animal.type)}</Text>
-         {/* <Image
+        {/* <Text style={styles.bannerIcon}>{getAnimalIcon(animal.type)}</Text> */}
+         <Image
         style={{height:150,width:230}}
          source={{
       uri: "https://drive.google.com/uc?export=download&id=1OUejHErCoaQFUCoxcy4eCa-RQPDWozVV"
     }}
-        /> */}
+        />
       </View>
 
       <View style={styles.identityRow}>
@@ -236,63 +251,89 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
         {animal.notes ? <DetailRow label="Notes" value={animal.notes} /> : null}
       </AppCard>
 
-      <AppCard style={styles.section}>
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Milk Production</Text>
 
-        {recordsLoading ? (
-          <Loading message="Loading production records..." />
-        ) : recordsError ? (
-          <EmptyState
-            icon="⚠️"
-            title="Couldn't load production"
-            message={recordsError.message || 'Please try again.'}
-            actionLabel="Retry"
-            onActionPress={loadProduction}
-          />
-        ) : (
-          <>
-            <View style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <Text style={styles.statValue}>
-                  {formatLiters(productionSummary.total)}
-                </Text>
-                <Text style={styles.statLabel}>Total Production</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statValue}>
-                  {formatLiters(productionSummary.average)}
-                </Text>
-                <Text style={styles.statLabel}>Avg / Day</Text>
-              </View>
-            </View>
+        <DateRangeFilter
+          value={range}
+          onChange={setRange}
+          style={styles.dateFilter}
+        />
 
-            <View style={styles.recentHeaderRow}>
-              <Text style={styles.recentTitle}>Recent Records</Text>
-              <Text
-                style={styles.viewAll}
-                onPress={() =>
-                  navigation.navigate(TABS.PRODUCTION, {
-                    screen: PRODUCTION_ROUTES.HISTORY,
-                  })
-                }
-              >
-                View All
-              </Text>
-            </View>
+        <SectionTabs
+          tabs={TABS_CONFIG}
+          activeKey={activeTab}
+          onSelect={setActiveTab}
+        />
 
-            {productionSummary.recent.length === 0 ? (
-              <EmptyState
-                title="No production records yet"
-                message="Milk production for this animal will show up here."
-              />
-            ) : (
-              productionSummary.recent.map(record => (
-                <ProductionRecordRow key={record.id} record={record} />
-              ))
-            )}
-          </>
-        )}
-      </AppCard>
+        <View style={styles.tabContent}>
+          {recordsLoading ? (
+            <Loading message="Loading production records..." />
+          ) : recordsError ? (
+            <EmptyState
+              icon="⚠️"
+              title="Couldn't load production"
+              message={recordsError.message || 'Please try again.'}
+              actionLabel="Retry"
+              onActionPress={loadProduction}
+            />
+          ) : activeTab === 'OVERVIEW' ? (
+            <>
+              <Text style={styles.chartTitle}>Milk Production (Liters)</Text>
+              {chartData.length > 0 ? (
+                <SimpleBarChart data={chartData} />
+              ) : (
+                <EmptyState
+                  title="No data"
+                  message="No production records for this period."
+                />
+              )}
+
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Total Production</Text>
+                <Text style={styles.totalValue}>{formatLiters(totalProduction)}</Text>
+              </View>
+
+              {shiftBreakdown.length > 0 ? (
+                <View style={styles.shiftSection}>
+                  <Text style={styles.shiftTitle}>By Shift</Text>
+                  {shiftBreakdown.map(item => (
+                    <StatBreakdownRow key={item.key} {...item} />
+                  ))}
+                </View>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <View style={styles.statsRow}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>
+                    {formatLiters(totalProduction)}
+                  </Text>
+                  <Text style={styles.statLabel}>Total Production</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>{historyRecords.length}</Text>
+                  <Text style={styles.statLabel}>Sessions</Text>
+                </View>
+              </View>
+
+              <Text style={styles.recentTitle}>Production Records</Text>
+
+              {historyRecords.length === 0 ? (
+                <EmptyState
+                  title="No production records yet"
+                  message="Milk production for this animal will show up here."
+                />
+              ) : (
+                historyRecords.map(record => (
+                  <ProductionRecordRow key={record.id} record={record} />
+                ))
+              )}
+            </>
+          )}
+        </View>
+      </View>
 
       <AppButton
         title="Delete Animal"
@@ -410,21 +451,47 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: spacing.xs / 2,
   },
-  recentHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  dateFilter: {
+    marginHorizontal: -spacing.lg,
+    marginBottom: spacing.md,
+  },
+  tabContent: {
+    marginTop: spacing.md,
+  },
+  chartTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.text,
     marginBottom: spacing.xs,
+  },
+  totalRow: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  totalLabel: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+  },
+  totalValue: {
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginTop: spacing.xs / 2,
+  },
+  shiftSection: {
+    marginTop: spacing.sm,
+  },
+  shiftTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   recentTitle: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.semibold,
     color: colors.text,
-  },
-  viewAll: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.medium,
-    color: colors.primary,
+    marginBottom: spacing.xs,
   },
   deleteButton: {
     marginHorizontal: spacing.lg,

@@ -1,18 +1,17 @@
 /**
- * useSalesRecords
+ * usePurchaseRecords
  *
- * Loads milk sales for a given date range via the real backend
+ * Loads milk purchases for a given date range via the real backend
  * endpoint:
- *   GET /milkSale/getAll?startDate=...&endDate=...
- * (MilkSaleController.getAllMilkSale — all query params are optional,
- * so this is a single request, not a composite fetch).
+ *   GET /purchase/getAll?startDate=...&endDate=...
+ * (MilkPurchaseController.getAllPurchases — all query params optional).
  */
 import { useCallback, useState } from 'react';
 import { get } from '../../api/decentralizedWrapper';
 import { toQueryDateRange } from '../../utils/dateRanges';
 
-const useSalesRecords = range => {
-  const [sales, setSales] = useState([]);
+const usePurchaseRecords = range => {
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -23,12 +22,12 @@ const useSalesRecords = range => {
 
       const { startDate, endDate } = toQueryDateRange(range);
       const response = await get(
-        `/milkSale/getAll?startDate=${startDate}&endDate=${endDate}`,
+        `/purchase/getAll?startDate=${startDate}&endDate=${endDate}`,
       );
       const sorted = (Array.isArray(response) ? response : []).sort((a, b) =>
-        (b.saleDate || '').localeCompare(a.saleDate || ''),
+        (b.purchaseDate || '').localeCompare(a.purchaseDate || ''),
       );
-      setSales(sorted);
+      setPurchases(sorted);
     } catch (err) {
       setError(err);
     } finally {
@@ -37,11 +36,17 @@ const useSalesRecords = range => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range.startDate, range.endDate]);
 
-  const totalQuantity = sales.reduce((sum, sale) => sum + Number(sale.quantity || 0), 0);
-  const totalAmount = sales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
+  const totalQuantity = purchases.reduce(
+    (sum, purchase) => sum + Number(purchase.quantity || 0),
+    0,
+  );
+  const totalAmount = purchases.reduce(
+    (sum, purchase) => sum + Number(purchase.amount || 0),
+    0,
+  );
 
   return {
-    sales,
+    purchases,
     totalQuantity,
     totalAmount,
     loading,
@@ -50,4 +55,4 @@ const useSalesRecords = range => {
   };
 };
 
-export default useSalesRecords;
+export default usePurchaseRecords;

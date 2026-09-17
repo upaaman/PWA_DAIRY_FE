@@ -11,6 +11,7 @@ export const TABS = {
   HOME: 'HomeTab',
   ANIMALS: 'AnimalsTab',
   PRODUCTION: 'ProductionTab',
+  PURCHASE: 'PurchaseTab',
   SALES: 'SalesTab',
   MORE: 'MoreTab',
 };
@@ -31,6 +32,12 @@ export const PRODUCTION_ROUTES = {
   FILTERS: 'ProductionFilters',
 };
 
+// Purchase stack
+export const PURCHASE_ROUTES = {
+  LIST: 'PurchaseList',
+  ADD: 'AddPurchase',
+};
+
 // Sales stack
 export const SALES_ROUTES = {
   LIST: 'MilkSalesList',
@@ -43,4 +50,5 @@ export const MORE_ROUTES = {
   MENU: 'MoreMenu',
   PROFILE: 'Profile',
   SETTINGS: 'Settings',
+  SELLER: 'Seller',
 };

@@ -1,16 +1,9 @@
 /**
- * MilkSalesListScreen
+ * PurchaseListScreen
  *
  * Real backend data via a single request:
- *   GET /milkSale/getAll?startDate=...&endDate=...
- * (all query params are optional on this endpoint).
- *
- * No summary/"Total Sales" card here per product decision — just the
- * date filter and the list.
- *
- * Payment method is NOT shown — the backend MilkSale entity has no
- * such field (only saleDate, quantity, rate, shift, animalType,
- * customer, amount). Not invented here.
+ *   GET /purchase/getAll?startDate=...&endDate=...
+ * (MilkPurchaseController.getAllPurchases — all query params optional).
  */
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -21,9 +14,9 @@ import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
 import { fontSize, spacing } from '../../constants/appConstants';
 import { RANGE_KEYS, getDateRangeForKey } from '../../utils/dateRanges';
-import { SALES_ROUTES } from '../../navigation/routes';
-import useSalesRecords from './useSalesRecords';
-import SaleListItem from './SaleListItem';
+import { PURCHASE_ROUTES } from '../../navigation/routes';
+import usePurchaseRecords from './usePurchaseRecords';
+import PurchaseListItem from './PurchaseListItem';
 
 const AddHeaderButton = ({ onPress }) => (
   <Pressable onPress={onPress} style={styles.headerButton} hitSlop={8}>
@@ -31,13 +24,13 @@ const AddHeaderButton = ({ onPress }) => (
   </Pressable>
 );
 
-const MilkSalesListScreen = ({ navigation }) => {
+const PurchaseListScreen = ({ navigation }) => {
   const [range, setRange] = useState(() => ({
     rangeKey: RANGE_KEYS.THIS_MONTH,
     ...getDateRangeForKey(RANGE_KEYS.THIS_MONTH),
   }));
 
-  const { sales, loading, error, reload } = useSalesRecords(range);
+  const { purchases, loading, error, reload } = usePurchaseRecords(range);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,7 +44,7 @@ const MilkSalesListScreen = ({ navigation }) => {
   };
 
   const openAdd = useCallback(() => {
-    navigation.navigate(SALES_ROUTES.ADD);
+    navigation.navigate(PURCHASE_ROUTES.ADD);
   }, [navigation]);
 
   useLayoutEffect(() => {
@@ -61,14 +54,14 @@ const MilkSalesListScreen = ({ navigation }) => {
   }, [navigation, openAdd]);
 
   if (loading) {
-    return <Loading message="Loading sales..." />;
+    return <Loading message="Loading purchases..." />;
   }
 
   if (error) {
     return (
       <EmptyState
         icon="⚠️"
-        title="Couldn't load sales"
+        title="Couldn't load purchases"
         message={error.message || 'Please try again.'}
         actionLabel="Retry"
         onActionPress={reload}
@@ -86,21 +79,14 @@ const MilkSalesListScreen = ({ navigation }) => {
       />
 
       <FlatList
-        data={sales}
+        data={purchases}
         keyExtractor={item => String(item.id)}
-        renderItem={({ item }) => (
-          <SaleListItem
-            sale={item}
-            onPress={() =>
-              navigation.navigate(SALES_ROUTES.DETAILS, { sale: item })
-            }
-          />
-        )}
+        renderItem={({ item }) => <PurchaseListItem purchase={item} />}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <EmptyState
-            title="No sales found"
-            message="Try a different date range, or record a new sale."
+            title="No purchases found"
+            message="Try a different date range, or record a new purchase."
           />
         }
       />
@@ -131,4 +117,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MilkSalesListScreen;
+export default PurchaseListScreen;

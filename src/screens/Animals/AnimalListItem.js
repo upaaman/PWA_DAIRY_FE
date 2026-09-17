@@ -31,12 +31,12 @@ const AnimalListItem = ({ animal, onPress }) => {
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
     >
       <View style={styles.avatar}>
-        <Text style={styles.avatarIcon}>{getAnimalIcon(animal.type)}</Text>
+        {/* <Text style={styles.avatarIcon}>{getAnimalIcon(animal.type)}</Text> */}
          <Image
     style={{height:30,width:30}}
-    // source={{
-    //   uri: "https://drive.google.com/uc?export=download&id=1OUejHErCoaQFUCoxcy4eCa-RQPDWozVV"
-    // }}
+    source={{
+      uri: "https://drive.google.com/uc?export=download&id=1OUejHErCoaQFUCoxcy4eCa-RQPDWozVV"
+    }}
   />
       </View>
 
