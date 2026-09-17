@@ -66,7 +66,7 @@ const BillPreviewModal = ({
   const previewTitle = isSeller ? 'Payment Bill Preview' : 'Sales Invoice Preview';
   const billTitleText = isSeller ? 'Payment Bill' : 'Sales Invoice';
   const billSubtitleText = isSeller ? '(To be paid to Seller)' : '(To be paid by Customer)';
-  const partyLabel = isSeller ? 'Seller Details' : 'Buyer Details';
+  const partyLabel = isSeller ? 'Seller Details' : 'Customer Details';
   const amountCardTitle = isSeller ? 'Amount to be Paid' : 'Amount Receivable';
   const remarksLabel = isSeller ? 'Milk Purchase' : 'Milk Sale';
 
@@ -156,7 +156,7 @@ const BillPreviewModal = ({
                 </View>
               </View>
 
-              {/* Party Details (Seller or Buyer) */}
+              {/* Party Details (Seller or Customer) */}
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionHeaderText}>{partyLabel}</Text>
               </View>

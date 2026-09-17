@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-const BuyersScreen = () => {
+const CustomersScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Buyers</Text>
+      <Text style={styles.title}>Customers</Text>
     </View>
   );
 };
@@ -20,4 +20,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BuyersScreen;
+export default CustomersScreen;

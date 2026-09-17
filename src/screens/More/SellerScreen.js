@@ -44,7 +44,7 @@ import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/da
 import { formatCurrency, formatLiters } from '../../utils/format';
 import { printOrDownloadBill, shareBillSummary } from '../../utils/pdfService';
 
-const SellerScreen = () => {
+const SellerScreen = ({ navigation }) => {
   // Sellers list state
   const [sellers, setSellers] = useState([]);
   const [loadingSellers, setLoadingSellers] = useState(true);
@@ -272,6 +272,11 @@ const SellerScreen = () => {
                 title="Get Details"
                 onPress={handleGetDetails}
                 style={styles.getDetailsBtn}
+              />
+              <AppButton
+                title="+ Add Seller"
+                onPress={() => navigation.navigate('AddSeller')}
+                style={styles.addSellerBtn}
               />
             </View>
           </AppCard>
@@ -513,6 +518,10 @@ const styles = StyleSheet.create({
   getDetailsBtn: {
     marginTop: spacing.xs,
   },
+  addSellerBtn: {
+  marginTop: spacing.xs,
+  marginBottom: spacing.xs,
+},
 
   /* Active Details Styles */
   sellerHeaderCard: {

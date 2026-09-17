@@ -46,7 +46,7 @@ export const buildBillTextReceipt = billData => {
   const dateField = billData.dateField || (isSeller ? 'purchaseDate' : 'saleDate');
 
   const headingLabel = isSeller ? 'PAYMENT BILL' : 'SALES INVOICE';
-  const partyLabel = isSeller ? 'SELLER DETAILS' : 'BUYER DETAILS';
+  const partyLabel = isSeller ? 'SELLER DETAILS' : 'CUSTOMER DETAILS';
   const transactionsLabel = isSeller ? 'PURCHASE DETAILS' : 'SALE DETAILS';
 
   const formattedBillDate =

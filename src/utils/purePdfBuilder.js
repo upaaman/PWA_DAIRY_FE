@@ -73,7 +73,7 @@ export const generatePdfBase64 = billData => {
 
   // Generic "party" support: a Seller bill (money we pay out, purchases
   // from a seller) vs a Customer bill (money owed to us, sales to a
-  // buyer). Both Seller/Customer entities share the same shape
+  // customer). Both Seller/Customer entities share the same shape
   // ({ name, contact, address }), so only the labels/wording differ.
   const partyRole = billData.partyRole || (seller ? 'seller' : 'customer');
   const isSeller = partyRole === 'seller';
@@ -83,7 +83,7 @@ export const generatePdfBase64 = billData => {
 
   const billTitle = isSeller ? 'Payment Bill' : 'Sales Invoice';
   const billSubtitle = isSeller ? '(To be paid to Seller)' : '(To be paid by Customer)';
-  const partyLabel = isSeller ? 'Seller Details' : 'Buyer Details';
+  const partyLabel = isSeller ? 'Seller Details' : 'Customer Details';
   const amountCardLabel = isSeller ? 'Amount to be Paid' : 'Amount Receivable';
   const remarksLabel = isSeller ? 'Milk Purchase' : 'Milk Sale';
 
@@ -178,7 +178,7 @@ export const generatePdfBase64 = billData => {
     drawText('F2', 8, 355, 686, 'Period', 0.118, 0.227, 0.541);
     drawText('F1', 8, 416, 686, `${formattedStartDate} - ${formattedEndDate}`, 0.059, 0.090, 0.165);
 
-    // Party Details Box (Seller or Buyer, depending on bill type)
+    // Party Details Box (Seller or Customer, depending on bill type)
     setFillColor(0.937, 0.965, 1.0); // #eff6ff
     drawRect(36, 652, 523, 18, true, false);
     drawText('F2', 9.5, 42, 657, partyLabel, 0.118, 0.227, 0.541);

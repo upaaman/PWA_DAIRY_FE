@@ -49,7 +49,7 @@ const SaleDetailsScreen = ({ route }) => {
       </AppCard>
 
       <AppCard style={styles.section}>
-        <Text style={styles.sectionTitle}>Buyer</Text>
+        <Text style={styles.sectionTitle}>Customer</Text>
         <DetailRow label="Name" value={sale.customer?.name} />
         <DetailRow label="Contact" value={sale.customer?.contact} />
         <DetailRow label="Address" value={sale.customer?.address} />

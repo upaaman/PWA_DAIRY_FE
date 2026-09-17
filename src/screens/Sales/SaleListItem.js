@@ -1,7 +1,7 @@
 /**
  * SaleListItem
  *
- * Single row in the Milk Sales list: date + buyer on the left,
+ * Single row in the Milk Sales list: date + customer on the left,
  * quantity/amount on the right, chevron to view details.
  *
  * Note: the backend MilkSale entity has no "payment method" field, so
@@ -23,8 +23,8 @@ const SaleListItem = ({ sale, onPress }) => {
     >
       <View style={styles.info}>
         <Text style={styles.date}>{formatDateString(sale.saleDate) || '—'}</Text>
-        <Text style={styles.buyer} numberOfLines={1}>
-          {sale.customer?.name || 'Unknown buyer'} · {formatLiters(sale.quantity)}
+        <Text style={styles.customer} numberOfLines={1}>
+          {sale.customer?.name || 'Unknown customer'} · {formatLiters(sale.quantity)}
         </Text>
       </View>
 
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     color: colors.text,
   },
-  buyer: {
+  customer: {
     fontSize: fontSize.xs,
     color: colors.textSecondary,
     marginTop: spacing.xs / 2,

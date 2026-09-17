@@ -13,7 +13,7 @@
  * Note: MilkSaleRequstDTO has no @NotNull/@Valid validation on the
  * backend, but we still validate client-side for a sane UX.
  *
- * The buyer picker is populated from the real GET /customer/getAll
+ * The customer picker is populated from the real GET /customer/getAll
  * endpoint.
  */
 import React, { useCallback, useEffect, useState } from 'react';
@@ -75,7 +75,7 @@ const AddSaleScreen = ({ navigation }) => {
   const validate = () => {
     const nextErrors = {};
     if (!form.customerId) {
-      nextErrors.customerId = 'Please select a buyer.';
+      nextErrors.customerId = 'Please select a customer.';
     }
     if (!form.animalType) {
       nextErrors.animalType = 'Please select an animal type.';
@@ -139,14 +139,14 @@ const AddSaleScreen = ({ navigation }) => {
       : null;
 
   if (customersLoading) {
-    return <Loading message="Loading buyers..." />;
+    return <Loading message="Loading customers..." />;
   }
 
   if (customersError) {
     return (
       <EmptyState
         icon="⚠️"
-        title="Couldn't load buyers"
+        title="Couldn't load customers"
         message={customersError.message || 'Please try again.'}
         actionLabel="Retry"
         onActionPress={loadCustomers}
@@ -157,8 +157,8 @@ const AddSaleScreen = ({ navigation }) => {
   if (customers.length === 0) {
     return (
       <EmptyState
-        title="No buyers yet"
-        message="Add a buyer (customer) on the backend before recording a sale."
+        title="No customer yet"
+        message="Add a customer on the backend before recording a sale."
       />
     );
   }
@@ -173,8 +173,8 @@ const AddSaleScreen = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <AppSelect
-          label="Buyer *"
-          placeholder="Select buyer"
+          label="Customer *"
+          placeholder="Select customer"
           value={form.customerId}
           options={customerOptions}
           onSelect={value => setField('customerId', value)}
