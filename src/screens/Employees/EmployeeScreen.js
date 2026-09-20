@@ -165,15 +165,22 @@ const EmployeeScreen = ({ navigation }) => {
     }
   }, [isFocused, isDetailsActive, loadEmployees]);
 
-  // Load details (profile + salaries + totalRemainingAmount) and the ledger on
-// focus, when the selected employee changes, or when the ledger filters
-// change. Nothing in here re-fetches the employee list.
+// Load employee details (profile + salaries + totalRemainingAmount) on focus
+  // or when the selected employee changes. Kept separate from the ledger
+  // effect so changing the date/type filter never re-calls the details API.
   useEffect(() => {
     if (isFocused && isDetailsActive && selectedEmployeeId) {
       loadDetails();
+    }
+  }, [isFocused, isDetailsActive, selectedEmployeeId, loadDetails]);
+
+  // Load the ledger on focus, when the selected employee changes, or when the
+  // ledger filters change.
+  useEffect(() => {
+    if (isFocused && isDetailsActive && selectedEmployeeId) {
       loadTransactions();
     }
-  }, [isFocused, isDetailsActive, selectedEmployeeId, loadDetails, loadTransactions]);
+  }, [isFocused, isDetailsActive, selectedEmployeeId, loadTransactions]);
 
   const handleGetDetails = () => {
     if (!selectedEmployeeId) {
@@ -250,27 +257,38 @@ const EmployeeScreen = ({ navigation }) => {
     </AppCard>
   );
 
-  const renderTransactionRow = ({ item }) => (
-    <AppCard style={styles.listRow}>
-      <View style={styles.listRowLeft}>
-        <View style={styles.listRowTopLine}>
-          <Text style={styles.rowTitle}>{getSalaryTransactionTypeLabel(item.type)}</Text>
-          <View style={styles.typeBadge}>
-            <Text style={styles.typeBadgeText}>{getSalaryTransactionTypeLabel(item.type)}</Text>
+  const renderTransactionRow = ({ item }) => {
+    const isCredit = item.type === 'SALARY_CREDIT';
+    return (
+      <AppCard
+        style={[
+          styles.listRow,
+          isCredit ? styles.creditRow : styles.debitRow,
+        ]}
+      >
+        <View style={styles.listRowLeft}>
+          <View style={styles.listRowTopLine}>
+            <Text
+              style={[styles.rowTitle, isCredit ? styles.creditText : styles.debitText]}
+            >
+              {getSalaryTransactionTypeLabel(item.type)}
+            </Text>
           </View>
-        </View>
-        <Text style={styles.rowMeta}>
-          {formatDateString(item.transactionDate)} · Month: {item.salaryMonth || '—'}
-        </Text>
-        {item.notes ? (
-          <Text style={styles.rowNotes} numberOfLines={2}>
-            {item.notes}
+          <Text style={styles.rowMeta}>
+            {formatDateString(item.transactionDate)} · Month: {item.salaryMonth || '—'}
           </Text>
-        ) : null}
-      </View>
-      <Text style={styles.txAmount}>{formatCurrency(item.amount)}</Text>
-    </AppCard>
-  );
+          {item.notes ? (
+            <Text style={styles.rowNotes} numberOfLines={2}>
+              {item.notes}
+            </Text>
+          ) : null}
+        </View>
+        <Text style={[styles.txAmount, isCredit ? styles.creditAmount : styles.debitAmount]}>
+          {formatCurrency(item.amount)}
+        </Text>
+      </AppCard>
+    );
+  };
 
   // Initial view: employee dropdown + Get Details
   if (!isDetailsActive) {
@@ -887,6 +905,38 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     fontWeight: fontWeight.semibold,
     color: '#2563EB',
+  },
+  creditRow: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.success,
+  },
+  debitRow: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.danger,
+  },
+  creditText: {
+    color: colors.success,
+  },
+  debitText: {
+    color: colors.danger,
+  },
+  creditBadge: {
+    backgroundColor: colors.primaryLight,
+  },
+  creditBadgeText: {
+    color: colors.success,
+  },
+  debitBadge: {
+    backgroundColor: '#FEE2E2',
+  },
+  debitBadgeText: {
+    color: colors.danger,
+  },
+  creditAmount: {
+    color: colors.success,
+  },
+  debitAmount: {
+    color: colors.danger,
   },
   rowMeta: {
     fontSize: 11.5,
