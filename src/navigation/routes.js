@@ -72,3 +72,11 @@ export const CUSTOMER_ROUTES = {
   EDIT: 'EditCustomer',
   BILLING: 'Customer',
 };
+
+// Employee stack (nested inside the More stack)
+export const EMPLOYEE_ROUTES = {
+  SCREEN: 'Employee',
+  ADD_EMPLOYEE: 'AddEmployee',
+  ADD_SALARY: 'AddSalary',
+  ADD_SALARY_TRANSACTION: 'AddSalaryTransaction',
+};

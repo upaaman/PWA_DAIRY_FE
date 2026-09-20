@@ -9,12 +9,18 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AppCard from '../../components/AppCard';
 import colors from '../../constants/colors';
 import { fontSize, fontWeight, spacing } from '../../constants/appConstants';
-import { CUSTOMER_ROUTES, MORE_ROUTES, SELLER_ROUTES } from '../../navigation/routes';
+import {
+  CUSTOMER_ROUTES,
+  EMPLOYEE_ROUTES,
+  MORE_ROUTES,
+  SELLER_ROUTES,
+} from '../../navigation/routes';
 
 const MENU_ITEMS = [
   { label: 'Profile', route: MORE_ROUTES.PROFILE },
   { label: 'Sellers', route: SELLER_ROUTES.LIST },
   { label: 'Customers', route: CUSTOMER_ROUTES.LIST },
+  { label: 'Employee', route: EMPLOYEE_ROUTES.SCREEN },
   { label: 'Settings', route: MORE_ROUTES.SETTINGS },
 ];
 

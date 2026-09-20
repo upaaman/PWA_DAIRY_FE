@@ -18,8 +18,12 @@ import EditSellerScreen from '../screens/Sellers/EditSellerScreen';
 import CustomerListScreen from '../screens/Customers/CustomerListScreen';
 import CustomerDetailsScreen from '../screens/Customers/CustomerDetailsScreen';
 import EditCustomerScreen from '../screens/Customers/EditCustomerScreen';
+import EmployeeScreen from '../screens/Employees/EmployeeScreen';
+import AddEmployeeScreen from '../screens/Employees/AddEmployeeScreen';
+import AddSalaryScreen from '../screens/Employees/AddSalaryScreen';
+import AddSalaryTransactionScreen from '../screens/Employees/AddSalaryTransactionScreen';
 import colors from '../constants/colors';
-import { MORE_ROUTES, SELLER_ROUTES, CUSTOMER_ROUTES } from './routes';
+import { MORE_ROUTES, SELLER_ROUTES, CUSTOMER_ROUTES, EMPLOYEE_ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
 
@@ -95,6 +99,26 @@ const MoreNavigator = () => (
       name={MORE_ROUTES.SETTINGS}
       component={SettingsScreen}
       options={{ title: 'Settings' }}
+    />
+    <Stack.Screen
+      name={EMPLOYEE_ROUTES.SCREEN}
+      component={EmployeeScreen}
+      options={{ title: 'Employees' }}
+    />
+    <Stack.Screen
+      name={EMPLOYEE_ROUTES.ADD_EMPLOYEE}
+      component={AddEmployeeScreen}
+      options={{ title: 'Add Employee' }}
+    />
+    <Stack.Screen
+      name={EMPLOYEE_ROUTES.ADD_SALARY}
+      component={AddSalaryScreen}
+      options={{ title: 'Add Salary' }}
+    />
+    <Stack.Screen
+      name={EMPLOYEE_ROUTES.ADD_SALARY_TRANSACTION}
+      component={AddSalaryTransactionScreen}
+      options={{ title: 'Add Salary Transaction' }}
     />
   </Stack.Navigator>
 );
