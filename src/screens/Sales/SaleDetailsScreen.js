@@ -6,10 +6,14 @@
  * create/getAll), so this screen simply displays the sale object that
  * was already fetched by the list screen — passed via navigation
  * params — instead of inventing a details endpoint.
+ *
+ * "Edit" navigates to EditSaleScreen, which persists changes via
+ * PATCH /milkSale/update/{id}.
  */
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AppCard from '../../components/AppCard';
+import AppButton from '../../components/AppButton';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
 import { fontSize, fontWeight, spacing } from '../../constants/appConstants';
@@ -17,9 +21,10 @@ import { formatDateString } from '../../utils/date';
 import { formatCurrency, formatLiters } from '../../utils/format';
 import { getShiftLabel } from '../../constants/enums';
 import { getAnimalTypeLabel } from '../Animals/animalMeta';
+import { SALES_ROUTES } from '../../navigation/routes';
 import DetailRow from '../Animals/DetailRow';
 
-const SaleDetailsScreen = ({ route }) => {
+const SaleDetailsScreen = ({ navigation, route }) => {
   const { sale } = route.params || {};
 
   if (!sale) {
@@ -54,6 +59,12 @@ const SaleDetailsScreen = ({ route }) => {
         <DetailRow label="Contact" value={sale.customer?.contact} />
         <DetailRow label="Address" value={sale.customer?.address} />
       </AppCard>
+
+      <AppButton
+        title="Edit Sale"
+        onPress={() => navigation.navigate(SALES_ROUTES.EDIT, { sale })}
+        style={styles.editButton}
+      />
     </ScrollView>
   );
 };
@@ -92,6 +103,9 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     color: colors.text,
     marginBottom: spacing.sm,
+  },
+  editButton: {
+    marginTop: spacing.sm,
   },
 });
 

@@ -28,6 +28,8 @@ export const ANIMALS_ROUTES = {
 export const PRODUCTION_ROUTES = {
   LIST: 'MilkProductionList',
   ADD: 'AddMilkProduction',
+  DETAILS: 'MilkProductionDetail',
+  EDIT: 'EditMilkProduction',
   HISTORY: 'ProductionHistory',
   STATISTICS: 'ProductionStatistics',
   FILTERS: 'ProductionFilters',
@@ -44,6 +46,7 @@ export const SALES_ROUTES = {
   LIST: 'MilkSalesList',
   ADD: 'AddSale',
   DETAILS: 'SaleDetails',
+  EDIT: 'EditSale',
 };
 
 // More stack

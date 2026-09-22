@@ -7,10 +7,12 @@
  * Backend enums (do not invent extra values here):
  *   AnimalType:   COW, BUFFALO
  *   AnimalGender: MALE, FEMALE
- *   AnimalStatus: PRODUCING, NONPRODUCING, CHILD, MATERNITY
+ *   AnimalStatus: PRODUCING, NONPRODUCING, CHILD
  *
  * The farm only ever has cows and buffaloes, so the filter chips are
- * just All / Cows / Buffaloes — no "Others" option.
+ * All / Cows / Buffaloes / Inactive. Inactive animals (status INACTIVE)
+ * are only listed under the Inactive chip — they are hidden from All,
+ * Cows, and Buffaloes.
  */
 import colors from '../../constants/colors';
 
@@ -33,14 +35,13 @@ const STATUS_LABELS = {
   PRODUCING: 'Producing',
   NONPRODUCING: 'Non-Producing',
   CHILD: 'Child',
-  MATERNITY: 'Maternity',
 };
 
 const STATUS_COLORS = {
   PRODUCING: colors.success,
   NONPRODUCING: colors.warning,
-  MATERNITY: colors.info,
   CHILD: colors.textMuted,
+  INACTIVE: colors.textSecondary,
 };
 
 export const getAnimalTypeLabel = type => TYPE_LABELS[type] || 'Other';
@@ -49,18 +50,23 @@ export const getGenderLabel = gender => GENDER_LABELS[gender] || '—';
 export const getStatusLabel = status => STATUS_LABELS[status] || '—';
 export const getStatusColor = status => STATUS_COLORS[status] || colors.textMuted;
 
-// Filter chips shown above the list.
+// Filter chips shown above the list. Inactive animals live only under the
+// Inactive chip — they are excluded from All / Cows / Buffaloes.
 export const FILTER_OPTIONS = [
   { key: 'ALL', label: 'All' },
   { key: 'COW', label: 'Cows' },
   { key: 'BUFFALO', label: 'Buffaloes' },
+  { key: 'INACTIVE', label: 'Inactive' },
 ];
 
 export const matchesFilter = (animal, filterKey) => {
-  if (filterKey === 'ALL') {
-    return true;
+  if (filterKey === 'INACTIVE') {
+    return animal.status === 'INACTIVE';
   }
-  return animal.type === filterKey;
+  if (filterKey === 'ALL') {
+    return animal.status !== 'INACTIVE';
+  }
+  return animal.type === filterKey && animal.status !== 'INACTIVE';
 };
 
 // Option lists for the Add/Edit Animal form selects.
@@ -80,5 +86,4 @@ export const STATUS_OPTIONS = [
   { label: 'Producing', value: 'PRODUCING' },
   { label: 'Non-Producing', value: 'NONPRODUCING' },
   { label: 'Child', value: 'CHILD' },
-  { label: 'Maternity', value: 'MATERNITY' },
 ];

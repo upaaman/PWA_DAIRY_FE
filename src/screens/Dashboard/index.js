@@ -103,6 +103,13 @@ const DashboardScreen = () => {
                 changePercent={data.totalSaleAmountChange}
                 backgroundColor={colors.warning}
               />
+              <DashboardStatCard
+                emoji="💸"
+                label="Total Salaries Paid"
+                value={formatCurrency(data.totalSalariesPaid) || '₹0'}
+                changePercent={data.salariesPaidChange}
+                backgroundColor={colors.accentPurple}
+              />
             </View>
           </>
         )}

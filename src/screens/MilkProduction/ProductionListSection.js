@@ -22,6 +22,7 @@ const ProductionListSection = ({
   error,
   onRetry,
   emptyMessage = 'No production records found for the selected filters.',
+  onPressItem,
   ListHeaderComponent,
 }) => {
   if (loading) {
@@ -51,7 +52,9 @@ const ProductionListSection = ({
     <SectionList
       sections={sections}
       keyExtractor={item => String(item.id)}
-      renderItem={({ item }) => <ProductionEntryRow record={item} />}
+      renderItem={({ item }) => (
+        <ProductionEntryRow record={item} onPress={onPressItem} />
+      )}
       renderSectionHeader={({ section }) => (
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionDate}>

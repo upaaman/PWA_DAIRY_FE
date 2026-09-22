@@ -25,7 +25,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, usePreventRemove } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
 import AppButton from '../../components/AppButton';
 import AppCard from '../../components/AppCard';
@@ -86,6 +86,15 @@ const EmployeeScreen = ({ navigation }) => {
     rangeKey: RANGE_KEYS.THIS_MONTH,
     ...getDateRangeForKey(RANGE_KEYS.THIS_MONTH),
   }));
+
+  // While the tabbed details view is active, back collapses back to the
+  // employee selection view instead of popping the whole screen (which would
+  // jump to the More page).
+  usePreventRemove(isDetailsActive, () => {
+    setSelectError(null);
+    setActiveTab('BASIC');
+    setIsDetailsActive(false);
+  });
 
   const loadEmployees = useCallback(async () => {
     try {

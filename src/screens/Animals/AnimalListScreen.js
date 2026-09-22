@@ -5,11 +5,12 @@
  * chips, and the list of animals. Tapping a row navigates to
  * Animal Details.
  *
- * Data comes from the real backend endpoint:
- *   GET /animal/getAll  (see AnimalController.getAllAnimals)
- * which returns the full Animal entity list. The backend has no
- * query params for searching/filtering, so search + type filtering
- * are done client-side against the fetched list.
+ * Data comes from two real backend endpoints:
+ *   GET /animal/getAll                  active animals (All / Cows / Buffaloes)
+ *   GET /animal/getAll/inactive         inactive animals (Inactive chip only)
+ *
+ * The backend has no query params for searching/filtering, so search +
+ * type filtering are done client-side against the fetched lists.
  */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -39,6 +40,7 @@ const HeaderActions = ({ onFilter, onAdd }) => (
 
 const AnimalListScreen = ({ navigation }) => {
   const [animals, setAnimals] = useState([]);
+  const [inactiveAnimals, setInactiveAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,8 +50,12 @@ const AnimalListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await get('/animal/getAll');
-      setAnimals(Array.isArray(response) ? response : []);
+      const [activeResponse, inactiveResponse] = await Promise.all([
+        get('/animal/getAll'),
+        get('/animal/getAll/inactive'),
+      ]);
+      setAnimals(Array.isArray(activeResponse) ? activeResponse : []);
+      setInactiveAnimals(Array.isArray(inactiveResponse) ? inactiveResponse : []);
     } catch (err) {
       setError(err);
     } finally {
@@ -84,17 +90,27 @@ const AnimalListScreen = ({ navigation }) => {
 
   const filterCounts = useMemo(() => {
     return FILTER_OPTIONS.reduce((acc, option) => {
-      acc[option.key] = animals.filter(animal =>
-        matchesFilter(animal, option.key),
-      ).length;
+      acc[option.key] =
+        option.key === 'INACTIVE'
+          ? inactiveAnimals.length
+          : animals.filter(animal => matchesFilter(animal, option.key)).length;
       return acc;
     }, {});
-  }, [animals]);
+  }, [animals, inactiveAnimals]);
 
   const filteredAnimals = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return animals
-      .filter(animal => matchesFilter(animal, activeFilter))
+    // The Inactive chip shows the dedicated /animal/getAll/inactive list;
+    // All / Cows / Buffaloes come from /animal/getAll (inactive excluded).
+    const source =
+      activeFilter === 'INACTIVE' ? inactiveAnimals : animals;
+    return source
+      .filter(animal => {
+        if (activeFilter === 'INACTIVE') {
+          return true;
+        }
+        return matchesFilter(animal, activeFilter);
+      })
       .filter(animal => {
         if (!query) {
           return true;
@@ -103,7 +119,7 @@ const AnimalListScreen = ({ navigation }) => {
         const nameMatch = (animal.name || '').toLowerCase().includes(query);
         return idMatch || nameMatch;
       });
-  }, [animals, activeFilter, searchQuery]);
+  }, [animals, inactiveAnimals, activeFilter, searchQuery]);
 
   const handleAnimalPress = animal => {
     navigation.navigate(ANIMALS_ROUTES.DETAILS, { animalId: animal.id });

@@ -121,6 +121,9 @@ const MilkProductionListScreen = ({ navigation, route }) => {
         loading={loading}
         error={error}
         onRetry={reload}
+        onPressItem={record =>
+          navigation.navigate(PRODUCTION_ROUTES.DETAILS, { record })
+        }
         emptyMessage="Try a different date range or filter, or add a new production entry."
       />
     </View>

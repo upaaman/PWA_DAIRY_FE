@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MilkSalesListScreen from '../screens/Sales/MilkSalesListScreen';
 import AddSaleScreen from '../screens/Sales/AddSaleScreen';
 import SaleDetailsScreen from '../screens/Sales/SaleDetailsScreen';
+import EditSaleScreen from '../screens/Sales/EditSaleScreen';
 import colors from '../constants/colors';
 import { SALES_ROUTES } from './routes';
 
@@ -35,6 +36,11 @@ const SalesNavigator = () => (
       name={SALES_ROUTES.DETAILS}
       component={SaleDetailsScreen}
       options={{ title: 'Sale Details' }}
+    />
+    <Stack.Screen
+      name={SALES_ROUTES.EDIT}
+      component={EditSaleScreen}
+      options={{ title: 'Edit Sale' }}
     />
   </Stack.Navigator>
 );

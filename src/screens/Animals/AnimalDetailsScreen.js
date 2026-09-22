@@ -1,11 +1,14 @@
 /**
  * AnimalDetailsScreen
  *
- * Shows full details for one animal plus its milk production summary.
+ * Shows full details for one animal plus its milk production and expense
+ * summary (Overview / Production / Expense tabs).
  *
- * Data comes from two real backend endpoints:
- *   GET /animal/get/{id}                       (AnimalController.getAnimalById)
- *   GET /milkProduction/getAll?animalId={id}     (MilkProductionController.getAllMilkProduction)
+ * Data comes from a single real backend endpoint:
+ *   GET /animal/get/{id}?startDate={date}&endDate={date}
+ *   (AnimalController.getAnimalById) which returns the animal profile,
+ *   milkProductionList, expenseRecordOfAnimal, totalMilkProduced and
+ *   totalExpense — all filtered by the selected date range.
  *
  * Delete uses:
  *   DELETE /animal/deleteAnimal/{id}             (AnimalController.deleteAnimalWithId)
@@ -32,7 +35,6 @@ import { formatCurrency, formatLiters } from '../../utils/format';
 import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
 import { ANIMALS_ROUTES } from '../../navigation/routes';
 import {
-  getAnimalIcon,
   getAnimalTypeLabel,
   getGenderLabel,
   getStatusColor,
@@ -40,24 +42,23 @@ import {
 } from './animalMeta';
 import { bucketByDay, computeShiftBreakdown } from './animalProductionMeta';
 import DetailRow from './DetailRow';
+import ExpenseRecordRow from './ExpenseRecordRow';
 import ProductionRecordRow from './ProductionRecordRow';
 import SectionTabs from './SectionTabs';
 import StatBreakdownRow from '../MilkProduction/StatBreakdownRow';
 
 const TABS_CONFIG = [
   { key: 'OVERVIEW', label: 'Overview' },
-  { key: 'HISTORY', label: 'Production History' },
+  { key: 'PRODUCTION', label: 'Production' },
+  { key: 'EXPENSE', label: 'Expense' },
 ];
 
 // Defined outside the screen so it isn't re-created every render
 // (navigation.setOptions needs a stable component reference).
-const HeaderActions = ({ onEdit, onDelete }) => (
+const HeaderActions = ({ onEdit }) => (
   <View style={styles.headerActions}>
     <Pressable onPress={onEdit} style={styles.headerButton} hitSlop={8}>
       <Text style={styles.headerIcon}>✏️</Text>
-    </Pressable>
-    <Pressable onPress={onDelete} style={styles.headerButton} hitSlop={8}>
-      <Text style={styles.headerIcon}>🗑️</Text>
     </Pressable>
   </View>
 );
@@ -75,46 +76,28 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
   }));
   const [activeTab, setActiveTab] = useState('OVERVIEW');
 
-  const [records, setRecords] = useState([]);
-  const [recordsLoading, setRecordsLoading] = useState(true);
-  const [recordsError, setRecordsError] = useState(null);
-
   const [deleting, setDeleting] = useState(false);
 
   const loadAnimal = useCallback(async () => {
     try {
       setAnimalLoading(true);
       setAnimalError(null);
-      const response = await get(`/animal/get/${animalId}`);
+      const { startDate, endDate } = toQueryDateRange(range);
+      const response = await get(
+        `/animal/get/${animalId}?startDate=${startDate}&endDate=${endDate}`,
+      );
       setAnimal(response);
     } catch (err) {
       setAnimalError(err);
     } finally {
       setAnimalLoading(false);
     }
-  }, [animalId]);
-
-  const loadProduction = useCallback(async () => {
-    try {
-      setRecordsLoading(true);
-      setRecordsError(null);
-      const { startDate, endDate } = toQueryDateRange(range);
-      const query = `?animalId=${animalId}&startDate=${startDate}&endDate=${endDate}`;
-      const response = await get(`/milkProduction/getAll${query}`);
-      setRecords(Array.isArray(response) ? response : []);
-    } catch (err) {
-      setRecordsError(err);
-    } finally {
-      setRecordsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animalId, range.startDate, range.endDate]);
+  }, [animalId, range]);
 
   useFocusEffect(
     useCallback(() => {
       loadAnimal();
-      loadProduction();
-    }, [loadAnimal, loadProduction]),
+    }, [loadAnimal]),
   );
 
   const handleEdit = useCallback(() => {
@@ -126,57 +109,47 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     });
   }, [navigation, animal]);
 
-  const handleDelete = useCallback(() => {
-    Alert.alert(
-      'Delete Animal',
-      `Are you sure you want to delete ${animal?.name || 'this animal'}? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setDeleting(true);
-              await del(`/animal/deleteAnimal/${animalId}`);
-              Alert.alert('Deleted', 'Animal deleted successfully.', [
-                { text: 'OK', onPress: () => navigation.goBack() },
-              ]);
-            } catch (err) {
-              Alert.alert(
-                'Could not delete animal',
-                err.message || 'Something went wrong. Please try again.',
-              );
-            } finally {
-              setDeleting(false);
-            }
-          },
-        },
-      ],
-    );
-  }, [animal, animalId, navigation]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: animal?.name || 'Animal Details',
       headerRight: () => (
-        <HeaderActions onEdit={handleEdit} onDelete={handleDelete} />
+        <HeaderActions onEdit={handleEdit}  />
       ),
     });
-  }, [navigation, animal, handleEdit, handleDelete]);
+  }, [navigation, animal, handleEdit]);
+
+  const records = useMemo(() => animal?.milkProductionList || [], [animal]);
+  const expenses = useMemo(
+    () => animal?.expenseRecordOfAnimal || [],
+    [animal],
+  );
 
   const totalProduction = useMemo(
     () => records.reduce((sum, record) => sum + Number(record.quantity || 0), 0),
     [records],
   );
 
+  // Prefer the totals the animal-details API already computes, falling back
+  // to a client-side sum when they aren't present.
+  const totalMilkProduced = Number(animal?.totalMilkProduced || 0) || totalProduction;
+
+  const totalExpense = useMemo(
+    () =>
+      Number(animal?.totalExpense || 0) ||
+      expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0),
+    [animal, expenses],
+  );
+
+
+  
   const chartData = useMemo(
     () => bucketByDay(records, range.startDate, range.endDate),
     [records, range.startDate, range.endDate],
   );
-
+  
   const shiftBreakdown = useMemo(() => computeShiftBreakdown(records), [records]);
-
+  
   const historyRecords = useMemo(
     () =>
       [...records].sort((a, b) => {
@@ -185,8 +158,9 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
         }
         return (b.productionDate || '').localeCompare(a.productionDate || '');
       }),
-    [records],
-  );
+      [records],
+    );
+    const avgMilkPerDay =historyRecords.length > 0 ? (totalMilkProduced / historyRecords.length)*2 : 0;
 
   if (animalLoading) {
     return <Loading message="Loading animal..." />;
@@ -230,7 +204,7 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       <View style={styles.identityRow}>
         <Text style={styles.name}>{animal.name || 'Unnamed'}</Text>
         <View style={styles.idBadge}>
-          <Text style={styles.idBadgeText}>#{animal.id}</Text>
+          <Text style={styles.idBadgeText}>#{animalId||"Aman"}</Text>
         </View>
       </View>
 
@@ -257,7 +231,7 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       </AppCard>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Milk Production</Text>
+        <Text style={styles.sectionTitle}>Animal Overview</Text>
 
         <DateRangeFilter
           value={range}
@@ -272,17 +246,7 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
         />
 
         <View style={styles.tabContent}>
-          {recordsLoading ? (
-            <Loading message="Loading production records..." />
-          ) : recordsError ? (
-            <EmptyState
-              icon="⚠️"
-              title="Couldn't load production"
-              message={recordsError.message || 'Please try again.'}
-              actionLabel="Retry"
-              onActionPress={loadProduction}
-            />
-          ) : activeTab === 'OVERVIEW' ? (
+          {activeTab === 'OVERVIEW' ? (
             <>
               <Text style={styles.chartTitle}>Milk Production (Liters)</Text>
               {chartData.length > 0 ? (
@@ -294,9 +258,19 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
                 />
               )}
 
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Total Production</Text>
-                <Text style={styles.totalValue}>{formatLiters(totalProduction)}</Text>
+              <View style={styles.statsRow}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>
+                    {formatLiters(totalMilkProduced)}
+                  </Text>
+                  <Text style={styles.statLabel}>Total Milk Produced</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>
+                    {formatLiters(avgMilkPerDay)}
+                  </Text>
+                  <Text style={styles.statLabel}>Avg / Day</Text>
+                </View>
               </View>
 
               {shiftBreakdown.length > 0 ? (
@@ -308,12 +282,12 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
                 </View>
               ) : null}
             </>
-          ) : (
+          ) : activeTab === 'PRODUCTION' ? (
             <>
               <View style={styles.statsRow}>
                 <View style={styles.statBox}>
                   <Text style={styles.statValue}>
-                    {formatLiters(totalProduction)}
+                    {formatLiters(totalMilkProduced)}
                   </Text>
                   <Text style={styles.statLabel}>Total Production</Text>
                 </View>
@@ -336,17 +310,37 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
                 ))
               )}
             </>
+          ) : (
+            <>
+              <View style={styles.statsRow}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>
+                    {formatCurrency(totalExpense)}
+                  </Text>
+                  <Text style={styles.statLabel}>Total Expense</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>{expenses.length}</Text>
+                  <Text style={styles.statLabel}>Expenses</Text>
+                </View>
+              </View>
+
+              <Text style={styles.recentTitle}>Expense Records</Text>
+
+              {expenses.length === 0 ? (
+                <EmptyState
+                  title="No expenses yet"
+                  message="Animal expenses will show up here."
+                />
+              ) : (
+                expenses.map(expense => (
+                  <ExpenseRecordRow key={expense.id} expense={expense} />
+                ))
+              )}
+            </>
           )}
         </View>
       </View>
-
-      <AppButton
-        title="Delete Animal"
-        variant="outline"
-        onPress={handleDelete}
-        loading={deleting}
-        style={styles.deleteButton}
-      />
     </ScrollView>
   );
 };
@@ -427,6 +421,7 @@ const styles = StyleSheet.create({
   section: {
     marginHorizontal: spacing.lg,
     marginTop: spacing.lg,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
     fontSize: fontSize.md,
@@ -468,20 +463,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     color: colors.text,
     marginBottom: spacing.xs,
-  },
-  totalRow: {
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  totalLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-  },
-  totalValue: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-    color: colors.text,
-    marginTop: spacing.xs / 2,
   },
   shiftSection: {
     marginTop: spacing.sm,

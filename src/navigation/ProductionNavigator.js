@@ -8,6 +8,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MilkProductionListScreen from '../screens/MilkProduction/MilkProductionListScreen';
 import AddMilkProductionScreen from '../screens/MilkProduction/AddMilkProductionScreen';
+import MilkProductionDetailScreen from '../screens/MilkProduction/MilkProductionDetailScreen';
+import EditMilkProductionScreen from '../screens/MilkProduction/EditMilkProductionScreen';
 import ProductionHistoryScreen from '../screens/MilkProduction/ProductionHistoryScreen';
 import ProductionStatisticsScreen from '../screens/MilkProduction/ProductionStatisticsScreen';
 import ProductionFiltersScreen from '../screens/MilkProduction/ProductionFiltersScreen';
@@ -33,6 +35,16 @@ const ProductionNavigator = () => (
       name={PRODUCTION_ROUTES.ADD}
       component={AddMilkProductionScreen}
       options={{ title: 'Add Production' }}
+    />
+    <Stack.Screen
+      name={PRODUCTION_ROUTES.DETAILS}
+      component={MilkProductionDetailScreen}
+      options={{ title: 'Production Details' }}
+    />
+    <Stack.Screen
+      name={PRODUCTION_ROUTES.EDIT}
+      component={EditMilkProductionScreen}
+      options={{ title: 'Edit Production' }}
     />
     <Stack.Screen
       name={PRODUCTION_ROUTES.HISTORY}

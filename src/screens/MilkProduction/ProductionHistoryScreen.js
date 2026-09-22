@@ -138,6 +138,9 @@ const ProductionHistoryScreen = ({ navigation, route }) => {
         loading={loading}
         error={error}
         onRetry={reload}
+        onPressItem={record =>
+          navigation.navigate(PRODUCTION_ROUTES.DETAILS, { record })
+        }
         ListHeaderComponent={listHeader}
         emptyMessage="Try changing your filters or select a different date range."
       />

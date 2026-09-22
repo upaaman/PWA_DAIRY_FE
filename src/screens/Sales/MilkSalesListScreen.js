@@ -15,7 +15,7 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import QuickRangeChips from '../../components/QuickRangeChips';
+import DateRangeFilter from '../../components/DateRangeFilter';
 import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
@@ -45,11 +45,6 @@ const MilkSalesListScreen = ({ navigation }) => {
     }, [reload]),
   );
 
-  const handleRangeSelect = key => {
-    const { startDate, endDate } = getDateRangeForKey(key);
-    setRange({ rangeKey: key, startDate, endDate });
-  };
-
   const openAdd = useCallback(() => {
     navigation.navigate(SALES_ROUTES.ADD);
   }, [navigation]);
@@ -78,10 +73,9 @@ const MilkSalesListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <QuickRangeChips
-        activeKey={range.rangeKey}
-        onSelect={handleRangeSelect}
-        rangeKeys={[RANGE_KEYS.TODAY, RANGE_KEYS.THIS_WEEK, RANGE_KEYS.THIS_MONTH]}
+      <DateRangeFilter
+        value={range}
+        onChange={setRange}
         style={styles.chipsRow}
       />
 

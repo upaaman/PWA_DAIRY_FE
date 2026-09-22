@@ -1,11 +1,13 @@
 /**
  * EditAnimalScreen
  *
- * Edit the editable fields of an existing animal (name, status, notes)
- * and persist only the fields the user actually changed as a delta:
+ * Edit the editable fields of an existing animal (name, status, notes,
+ * active toggle) and persist only the fields the user actually changed
+ * as a delta:
  *
  *   PATCH /animal/update/{id}
- *   { "name": "hello", "status": "CHILD" }   <- only the fields that differ
+ *   { "name": "hello", "status": "CHILD", "active": true }  <- only the
+ *   fields that differ
  *
  * Unchanged fields are intentionally NOT included in the payload, matching
  * the backend's partial-update PATCH behavior.
@@ -17,6 +19,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
@@ -43,6 +46,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
     name: initialAnimal?.name || '',
     status: initialAnimal?.status || null,
     notes: initialAnimal?.notes || '',
+    active: initialAnimal?.active ?? true,
   });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -61,6 +65,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
         name: response.name || '',
         status: response.status || null,
         notes: response.notes || '',
+        active: response.active ?? true,
       });
     } catch (err) {
       setLoadingError(err);
@@ -113,6 +118,9 @@ const EditAnimalScreen = ({ navigation, route }) => {
     }
     if (form.status !== (animal?.status || null)) {
       delta.status = form.status;
+    }
+    if (Boolean(form.active) !== (animal?.active ?? true)) {
+      delta.active = Boolean(form.active);
     }
 
     if (Object.keys(delta).length === 0) {
@@ -171,9 +179,28 @@ const EditAnimalScreen = ({ navigation, route }) => {
             <View style={styles.identityText}>
               <Text style={styles.identityName}>{animal.name}</Text>
               <Text style={styles.identityMeta}>
-                #{animal.id} · {animal.breed || '—'}
+                #{animalId} · {animal.breed || '—'}
               </Text>
             </View>
+          </View>
+        </AppCard>
+
+        <AppCard style={styles.activeCard}>
+          <View style={styles.activeRow}>
+            <View style={styles.activeTextGroup}>
+              <Text style={styles.activeLabel}>Active</Text>
+              <Text style={styles.activeSubtext}>
+                {form.active
+                  ? 'This animal is active and visible in the list.'
+                  : 'This animal is inactive and moved out of the list.'}
+              </Text>
+            </View>
+            <Switch
+              value={form.active}
+              onValueChange={value => setField('active', value)}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={colors.white}
+            />
           </View>
         </AppCard>
 
@@ -260,6 +287,32 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xs,
     color: colors.textSecondary,
     marginTop: 2,
+  },
+  activeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  activeRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  activeTextGroup: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  activeLabel: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: colors.text,
+  },
+  activeSubtext: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    marginTop: spacing.xs / 2,
   },
   notesInput: {
     minHeight: 90,

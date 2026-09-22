@@ -8,7 +8,7 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import QuickRangeChips from '../../components/QuickRangeChips';
+import DateRangeFilter from '../../components/DateRangeFilter';
 import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
@@ -38,11 +38,6 @@ const PurchaseListScreen = ({ navigation }) => {
     }, [reload]),
   );
 
-  const handleRangeSelect = key => {
-    const { startDate, endDate } = getDateRangeForKey(key);
-    setRange({ rangeKey: key, startDate, endDate });
-  };
-
   const openAdd = useCallback(() => {
     navigation.navigate(PURCHASE_ROUTES.ADD);
   }, [navigation]);
@@ -71,10 +66,9 @@ const PurchaseListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <QuickRangeChips
-        activeKey={range.rangeKey}
-        onSelect={handleRangeSelect}
-        rangeKeys={[RANGE_KEYS.TODAY, RANGE_KEYS.THIS_WEEK, RANGE_KEYS.THIS_MONTH]}
+      <DateRangeFilter
+        value={range}
+        onChange={setRange}
         style={styles.chipsRow}
       />
 
