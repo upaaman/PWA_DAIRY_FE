@@ -13,11 +13,16 @@
  *   animalId: @NotNull
  *   productionDate: @NotNull
  *
- * The animal picker is populated from the real GET /animal/getAll
+ * The animal picker is populated from the real
+ *   GET /animal/getAllMilkProductionAnimals?productionDate={date}&shift={shift}
  * endpoint (same one used by the Animal List screen).
+ *
+ * The list is date+shift specific, so it is re-fetched whenever the
+ * selected production date or shift changes, and the currently chosen
+ * animal is cleared if it is no longer eligible for the new selection.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { get, post } from '../../api/decentralizedWrapper';
 import AppButton from '../../components/AppButton';
 import AppInput from '../../components/AppInput';
@@ -41,23 +46,41 @@ const AddMilkProductionScreen = ({ navigation }) => {
   const [animals, setAnimals] = useState([]);
   const [animalsLoading, setAnimalsLoading] = useState(true);
   const [animalsError, setAnimalsError] = useState(null);
+  // Distinguishes the first load (full-screen loader allowed) from a
+  // background refresh after the user changes the date/shift.
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  const productionDate = toISODateString(form.productionDate);
+  const shift = form.shift;
+
   const loadAnimals = useCallback(async () => {
     try {
       setAnimalsLoading(true);
       setAnimalsError(null);
-      const response = await get('/animal/getAll');
-      setAnimals(Array.isArray(response) ? response : []);
+      const response = await get(
+        `/animal/getAllMilkProductionAnimals?productionDate=${productionDate}&shift=${shift}`,
+      );
+      const list = Array.isArray(response) ? response : [];
+      setAnimals(list);
+      // The picked animal may not be eligible for the new date/shift — if
+      // so, clear the selection so the form doesn't silently submit a
+      // stale animalId.
+      setForm(prev =>
+        prev.animalId && !list.some(animal => animal.id === prev.animalId)
+          ? { ...prev, animalId: null }
+          : prev,
+      );
+      setHasLoadedOnce(true);
     } catch (err) {
       setAnimalsError(err);
     } finally {
       setAnimalsLoading(false);
     }
-  }, []);
+  }, [productionDate, shift]);
 
   useEffect(() => {
     loadAnimals();
@@ -120,29 +143,31 @@ const AddMilkProductionScreen = ({ navigation }) => {
     value: animal.id,
   }));
 
-  if (animalsLoading) {
-    return <Loading message="Loading animals..." />;
-  }
+  if (!hasLoadedOnce) {
+    if (animalsLoading) {
+      return <Loading message="Loading animals..." />;
+    }
 
-  if (animalsError) {
-    return (
-      <EmptyState
-        icon="⚠️"
-        title="Couldn't load animals"
-        message={animalsError.message || 'Please try again.'}
-        actionLabel="Retry"
-        onActionPress={loadAnimals}
-      />
-    );
-  }
+    if (animalsError) {
+      return (
+        <EmptyState
+          icon="⚠️"
+          title="Couldn't load animals"
+          message={animalsError.message || 'Please try again.'}
+          actionLabel="Retry"
+          onActionPress={loadAnimals}
+        />
+      );
+    }
 
-  if (animals.length === 0) {
-    return (
-      <EmptyState
-        title="No animals yet"
-        message="Add an animal first before recording milk production."
-      />
-    );
+    if (animals.length === 0) {
+      return (
+        <EmptyState
+          title="No animals available"
+          message="No animals are eligible for milk production on the selected date and shift."
+        />
+      );
+    }
   }
 
   return (
@@ -154,6 +179,30 @@ const AddMilkProductionScreen = ({ navigation }) => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
+        {animalsLoading ? (
+          <View style={styles.refreshingBar}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={styles.refreshingText}>Updating list…</Text>
+          </View>
+        ) : null}
+
+        {animalsError ? (
+          <Pressable style={styles.errorBar} onPress={loadAnimals}>
+            <Text style={styles.errorBarText}>
+              Couldn't refresh animals for this date & shift — tap to retry.
+            </Text>
+          </Pressable>
+        ) : null}
+
+        {!animalsLoading && !animalsError && animals.length === 0 ? (
+          <View style={styles.emptyBar}>
+            <Text style={styles.emptyBarText}>
+              No animals are eligible for milk production on this date and
+              shift.
+            </Text>
+          </View>
+        ) : null}
+
         <AppSelect
           label="Animal *"
           placeholder="Select animal"
@@ -211,6 +260,43 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: spacing.md,
+  },
+  refreshingBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.primaryLight,
+    borderRadius: 6,
+    marginBottom: spacing.md,
+  },
+  refreshingText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: spacing.xs,
+  },
+  errorBar: {
+    backgroundColor: '#FDECEC',
+    padding: spacing.md,
+    borderRadius: 6,
+    marginBottom: spacing.md,
+  },
+  errorBarText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.danger,
+  },
+  emptyBar: {
+    backgroundColor: '#FFF6E5',
+    padding: spacing.md,
+    borderRadius: 6,
+    marginBottom: spacing.md,
+  },
+  emptyBarText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#8A5A00',
   },
 });
 

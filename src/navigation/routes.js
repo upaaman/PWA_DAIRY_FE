@@ -83,3 +83,9 @@ export const EMPLOYEE_ROUTES = {
   ADD_SALARY: 'AddSalary',
   ADD_SALARY_TRANSACTION: 'AddSalaryTransaction',
 };
+
+// Expense stack (nested inside the More stack)
+export const EXPENSE_ROUTES = {
+  LIST: 'ExpenseList',
+  ADD: 'AddExpense',
+};

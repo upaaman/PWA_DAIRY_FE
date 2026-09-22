@@ -12,6 +12,7 @@ import { fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import {
   CUSTOMER_ROUTES,
   EMPLOYEE_ROUTES,
+  EXPENSE_ROUTES,
   MORE_ROUTES,
   SELLER_ROUTES,
 } from '../../navigation/routes';
@@ -21,6 +22,7 @@ const MENU_ITEMS = [
   { label: 'Sellers', route: SELLER_ROUTES.LIST },
   { label: 'Customers', route: CUSTOMER_ROUTES.LIST },
   { label: 'Employee', route: EMPLOYEE_ROUTES.SCREEN },
+  { label: 'Expense', route: EXPENSE_ROUTES.LIST },
   { label: 'Settings', route: MORE_ROUTES.SETTINGS },
 ];
 

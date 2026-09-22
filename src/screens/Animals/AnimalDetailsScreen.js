@@ -10,20 +10,16 @@
  *   milkProductionList, expenseRecordOfAnimal, totalMilkProduced and
  *   totalExpense — all filtered by the selected date range.
  *
- * Delete uses:
- *   DELETE /animal/deleteAnimal/{id}             (AnimalController.deleteAnimalWithId)
- *
  * Edit uses:
  *   navigation -> EditAnimalScreen -> PATCH /animal/update/{id}
  *   (AnimalDetailsScreen navigates to EditAnimal, passing the loaded animal
  *   object so the edit form can pre-populate instantly.)
  */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { del, get } from '../../api/decentralizedWrapper';
+import { get } from '../../api/decentralizedWrapper';
 import AppCard from '../../components/AppCard';
-import AppButton from '../../components/AppButton';
 import DateRangeFilter from '../../components/DateRangeFilter';
 import SimpleBarChart from '../../components/SimpleBarChart';
 import Loading from '../../components/Loading';
@@ -75,8 +71,6 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     ...getDateRangeForKey(RANGE_KEYS.THIS_MONTH),
   }));
   const [activeTab, setActiveTab] = useState('OVERVIEW');
-
-  const [deleting, setDeleting] = useState(false);
 
   const loadAnimal = useCallback(async () => {
     try {
@@ -162,7 +156,10 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     );
     const avgMilkPerDay =historyRecords.length > 0 ? (totalMilkProduced / historyRecords.length)*2 : 0;
 
-  if (animalLoading) {
+  // Only show the full-screen loader on the first load. When the animal is
+  // already loaded (e.g. user switched the date range), keep the existing
+  // content visible and just show the subtle "Updating" indicator instead.
+  if (animalLoading && !animal) {
     return <Loading message="Loading animal..." />;
   }
 
@@ -191,6 +188,13 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
+      {animalLoading ? (
+        <View style={styles.refreshingBar}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.refreshingText}>Updating…</Text>
+        </View>
+      ) : null}
+
       <View style={styles.banner}>
         {/* <Text style={styles.bannerIcon}>{getAnimalIcon(animal.type)}</Text> */}
          <Image
@@ -352,6 +356,19 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: spacing.xxxl,
+  },
+  refreshingBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.primaryLight,
+  },
+  refreshingText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.medium,
+    color: colors.primary,
+    marginLeft: spacing.xs,
   },
   banner: {
     height: 160,

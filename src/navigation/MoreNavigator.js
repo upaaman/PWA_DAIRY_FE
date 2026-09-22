@@ -22,8 +22,16 @@ import EmployeeScreen from '../screens/Employees/EmployeeScreen';
 import AddEmployeeScreen from '../screens/Employees/AddEmployeeScreen';
 import AddSalaryScreen from '../screens/Employees/AddSalaryScreen';
 import AddSalaryTransactionScreen from '../screens/Employees/AddSalaryTransactionScreen';
+import ExpenseListScreen from '../screens/Expenses/ExpenseListScreen';
+import AddExpenseScreen from '../screens/Expenses/AddExpenseScreen';
 import colors from '../constants/colors';
-import { MORE_ROUTES, SELLER_ROUTES, CUSTOMER_ROUTES, EMPLOYEE_ROUTES } from './routes';
+import {
+  MORE_ROUTES,
+  SELLER_ROUTES,
+  CUSTOMER_ROUTES,
+  EMPLOYEE_ROUTES,
+  EXPENSE_ROUTES,
+} from './routes';
 
 const Stack = createNativeStackNavigator();
 
@@ -119,6 +127,16 @@ const MoreNavigator = () => (
       name={EMPLOYEE_ROUTES.ADD_SALARY_TRANSACTION}
       component={AddSalaryTransactionScreen}
       options={{ title: 'Add Salary Transaction' }}
+    />
+    <Stack.Screen
+      name={EXPENSE_ROUTES.LIST}
+      component={ExpenseListScreen}
+      options={{ title: 'Expenses' }}
+    />
+    <Stack.Screen
+      name={EXPENSE_ROUTES.ADD}
+      component={AddExpenseScreen}
+      options={{ title: 'Add Expense' }}
     />
   </Stack.Navigator>
 );
