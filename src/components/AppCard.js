@@ -1,8 +1,14 @@
 /**
  * AppCard
  *
- * Simple rounded, white card container with a subtle border/shadow.
+ * Rounded, white card container with a soft green-tinted shadow.
  * Used as the base building block for list rows, stat tiles, sections, etc.
+ *
+ * Variants:
+ *   - "default": white surface, soft shadow (list rows, stat tiles)
+ *   - "raised":   slightly stronger, floats above the background (hero/summary cards)
+ *   - "green":    soft green-tinted background, no border (highlights/quick actions)
+ *   - "outline":  transparent, thin green border (secondary content)
  *
  * Usage:
  *   <AppCard>
@@ -10,32 +16,38 @@
  *   </AppCard>
  */
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import colors from '../constants/colors';
-import { borderRadius, spacing } from '../constants/appConstants';
+import { borderRadius, shadows, spacing } from '../constants/appConstants';
 
-const AppCard = ({ children, style }) => {
-  return <View style={[styles.card, style]}>{children}</View>;
+const AppCard = ({ children, style, variant = 'default' }) => {
+  return <View style={[styles.base, styles[variant], style]}>{children}</View>;
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.white,
+  base: {
     borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+  },
+  default: {
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: spacing.lg,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    ...shadows.card,
+  },
+  raised: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
+  },
+  green: {
+    backgroundColor: colors.primaryLight,
+  },
+  outline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.green300,
   },
 });
 

@@ -21,6 +21,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AppButton from './AppButton';
 import colors from '../constants/colors';
+import { shadows } from '../constants/appConstants';
 import { fontSize, fontWeight, spacing } from '../constants/appConstants';
 
 const EmptyState = ({
@@ -32,7 +33,9 @@ const EmptyState = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
+      <View style={styles.iconWrap}>
+        <Text style={styles.icon}>{icon}</Text>
+      </View>
       {title ? <Text style={styles.title}>{title}</Text> : null}
       {message ? <Text style={styles.message}>{message}</Text> : null}
       {actionLabel ? (
@@ -52,10 +55,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xxl,
+    backgroundColor: colors.background,
+  },
+  iconWrap: {
+    width: 84,
+    height: 84,
+    borderRadius: 26,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.subtle,
+    marginBottom: spacing.lg,
   },
   icon: {
-    fontSize: 48,
-    marginBottom: spacing.md,
+    fontSize: 40,
   },
   title: {
     fontSize: fontSize.lg,

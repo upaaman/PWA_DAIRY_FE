@@ -7,14 +7,28 @@
  */
 
 const colors = {
-  // Brand
-  primary: '#1F6D3E', // dark green - main brand color (buttons, headers, active states)
+  // Brand greens — the app's theme is green
+  primary: '#1F6D3E', // main brand green (buttons, headers, active states)
   primaryDark: '#164F2D', // pressed/hover state for primary
+  primaryDeep: '#0F3D22', // darkest green - gradients, hero sections
   primaryLight: '#E7F5EC', // very light green - badges, selected chips, subtle backgrounds
+  primarySoft: '#F2FAF5', // faintest green wash - screen/scaffold tints
   secondary: '#4CAF50', // lighter green - secondary accents, success highlights
 
+  // Green scale (Tailwind-inspired) for flexible accent work
+  green50: '#F2FAF5',
+  green100: '#E0F3E7',
+  green200: '#C4E8D3',
+  green300: '#93D6AE',
+  green400: '#5CBC80',
+  green500: '#37A25F',
+  green600: '#268949',
+  green700: '#1F6D3E',
+  green800: '#17502F',
+  green900: '#113D24',
+
   // Feedback
-  success: '#2E7D32',
+  success: '#16A34A',
   warning: '#F59E0B',
   danger: '#DC2626',
   info: '#3B82F6',
@@ -24,20 +38,23 @@ const colors = {
   accentPurple: '#8B5CF6',
   accentTeal: '#0D9488',
 
-  // Neutrals
-  background: '#F7F9F8', // app background (light, slightly off-white)
+  // Surfaces & neutrals
+  background: '#F5F9F6', // app background (light, slightly green-tinted)
+  surface: '#FFFFFF', // cards, inputs
   white: '#FFFFFF',
-  border: '#E5E7EB', // subtle card/input borders
-  overlay: 'rgba(0, 0, 0, 0.4)',
+  border: '#E2EDE6', // subtle card/input borders
+  borderStrong: '#C9DFD2', // hover/filled borders
+  overlay: 'rgba(15, 61, 34, 0.4)', // modal scrim (green-tinted)
 
   // Text
-  text: '#111827', // primary text (near-black)
-  textSecondary: '#6B7280', // secondary/supporting text
-  textMuted: '#9CA3AF', // placeholders, disabled text
+  text: '#101B14', // primary text (near-black, green-tinted)
+  textSecondary: '#5B6E63', // secondary/supporting text
+  textMuted: '#9DB0A5', // placeholders, disabled text
   textOnPrimary: '#FFFFFF', // text placed on top of primary green
 
   // Shadow (used with elevation/shadow style helpers)
-  shadow: 'rgba(16, 24, 40, 0.08)',
+  shadow: 'rgba(15, 61, 34, 0.10)',
+  shadowSubtle: 'rgba(15, 61, 34, 0.06)',
 };
 
 export default colors;

@@ -24,7 +24,7 @@ import AddSalaryScreen from '../screens/Employees/AddSalaryScreen';
 import AddSalaryTransactionScreen from '../screens/Employees/AddSalaryTransactionScreen';
 import ExpenseListScreen from '../screens/Expenses/ExpenseListScreen';
 import AddExpenseScreen from '../screens/Expenses/AddExpenseScreen';
-import colors from '../constants/colors';
+import { stackScreenOptions } from './navigationTheme';
 import {
   MORE_ROUTES,
   SELLER_ROUTES,
@@ -35,14 +35,8 @@ import {
 
 const Stack = createNativeStackNavigator();
 
-const screenOptions = {
-  headerStyle: { backgroundColor: colors.white },
-  headerTintColor: colors.text,
-  headerTitleStyle: { fontWeight: '600' },
-};
-
 const MoreNavigator = () => (
-  <Stack.Navigator screenOptions={screenOptions}>
+  <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
       name={MORE_ROUTES.MENU}
       component={MoreMenuScreen}

@@ -3,6 +3,9 @@
  *
  * Reusable labeled text input with an optional error message.
  *
+ * Field styling is shared visually with AppSelect/AppDatePicker (rounded
+ * corners, soft green focus ring, green-tinted scrim on focus).
+ *
  * Usage:
  *   <AppInput
  *     label="Name"
@@ -28,7 +31,12 @@ const AppInput = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.labelDot}>●</Text>
+        </View>
+      ) : null}
       <TextInput
         placeholderTextColor={colors.textMuted}
         style={[
@@ -37,6 +45,7 @@ const AppInput = ({
           error && styles.inputError,
           style,
         ]}
+        selectionColor={colors.primary}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         {...textInputProps}
@@ -50,24 +59,35 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.lg,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
   label: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
     color: colors.text,
-    marginBottom: spacing.xs,
+  },
+  labelDot: {
+    fontSize: 6,
+    color: colors.primary,
+    marginLeft: spacing.xs,
+    marginBottom: 2,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md - 2,
     fontSize: fontSize.md,
     color: colors.text,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   inputFocused: {
     borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
   inputError: {
     borderColor: colors.danger,

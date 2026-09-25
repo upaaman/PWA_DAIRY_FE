@@ -9,19 +9,13 @@ import AnimalListScreen from '../screens/Animals/AnimalListScreen';
 import AddAnimalScreen from '../screens/Animals/AddAnimalScreen';
 import AnimalDetailsScreen from '../screens/Animals/AnimalDetailsScreen';
 import EditAnimalScreen from '../screens/Animals/EditAnimalScreen';
-import colors from '../constants/colors';
+import { stackScreenOptions } from './navigationTheme';
 import { ANIMALS_ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
 
-const screenOptions = {
-  headerStyle: { backgroundColor: colors.white },
-  headerTintColor: colors.text,
-  headerTitleStyle: { fontWeight: '600' },
-};
-
 const AnimalsNavigator = () => (
-  <Stack.Navigator screenOptions={screenOptions}>
+  <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
       name={ANIMALS_ROUTES.LIST}
       component={AnimalListScreen}

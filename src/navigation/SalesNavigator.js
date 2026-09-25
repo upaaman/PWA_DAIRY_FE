@@ -9,19 +9,13 @@ import MilkSalesListScreen from '../screens/Sales/MilkSalesListScreen';
 import AddSaleScreen from '../screens/Sales/AddSaleScreen';
 import SaleDetailsScreen from '../screens/Sales/SaleDetailsScreen';
 import EditSaleScreen from '../screens/Sales/EditSaleScreen';
-import colors from '../constants/colors';
+import { stackScreenOptions } from './navigationTheme';
 import { SALES_ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
 
-const screenOptions = {
-  headerStyle: { backgroundColor: colors.white },
-  headerTintColor: colors.text,
-  headerTitleStyle: { fontWeight: '600' },
-};
-
 const SalesNavigator = () => (
-  <Stack.Navigator screenOptions={screenOptions}>
+  <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
       name={SALES_ROUTES.LIST}
       component={MilkSalesListScreen}

@@ -61,7 +61,12 @@ const AppDatePicker = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.labelDot}>●</Text>
+        </View>
+      ) : null}
 
       <Pressable
         style={[styles.field, error && styles.fieldError]}
@@ -70,7 +75,9 @@ const AppDatePicker = ({
         <Text style={value ? styles.valueText : styles.placeholderText}>
           {value ? formatDisplayDate(value) : placeholder}
         </Text>
-        <Text style={styles.icon}>📅</Text>
+        <View style={styles.iconWrap}>
+          <Text style={styles.icon}>📅</Text>
+        </View>
       </Pressable>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -93,21 +100,31 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.lg,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
   label: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
     color: colors.text,
-    marginBottom: spacing.xs,
+  },
+  labelDot: {
+    fontSize: 6,
+    color: colors.primary,
+    marginLeft: spacing.xs,
+    marginBottom: 2,
   },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md - 2,
     backgroundColor: colors.white,
   },
   fieldError: {
@@ -121,8 +138,16 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.textMuted,
   },
+  iconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   icon: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.xs,
   },
   errorText: {
     marginTop: spacing.xs,

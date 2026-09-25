@@ -8,13 +8,17 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import colors from '../constants/colors';
-import { borderRadius, fontSize, fontWeight, spacing } from '../constants/appConstants';
+import { borderRadius, fontSize, fontWeight, shadows, spacing } from '../constants/appConstants';
 
 const FilterChip = ({ label, count, active, onPress }) => {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, active && styles.chipActive]}
+      style={({ pressed }) => [
+        styles.chip,
+        active && styles.chipActive,
+        pressed && !active && styles.chipPressed,
+      ]}
     >
       <Text style={[styles.label, active && styles.labelActive]}>
         {label}
@@ -30,10 +34,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs + 2,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: spacing.sm,
+    ...shadows.subtle,
+  },
+  chipPressed: {
+    transform: [{ scale: 0.97 }],
   },
   chipActive: {
     backgroundColor: colors.primary,
@@ -46,6 +54,7 @@ const styles = StyleSheet.create({
   },
   labelActive: {
     color: colors.white,
+    fontWeight: fontWeight.semibold,
   },
 });
 

@@ -13,19 +13,13 @@ import EditMilkProductionScreen from '../screens/MilkProduction/EditMilkProducti
 import ProductionHistoryScreen from '../screens/MilkProduction/ProductionHistoryScreen';
 import ProductionStatisticsScreen from '../screens/MilkProduction/ProductionStatisticsScreen';
 import ProductionFiltersScreen from '../screens/MilkProduction/ProductionFiltersScreen';
-import colors from '../constants/colors';
+import { stackScreenOptions } from './navigationTheme';
 import { PRODUCTION_ROUTES } from './routes';
 
 const Stack = createNativeStackNavigator();
 
-const screenOptions = {
-  headerStyle: { backgroundColor: colors.white },
-  headerTintColor: colors.text,
-  headerTitleStyle: { fontWeight: '600' },
-};
-
 const ProductionNavigator = () => (
-  <Stack.Navigator screenOptions={screenOptions}>
+  <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
       name={PRODUCTION_ROUTES.LIST}
       component={MilkProductionListScreen}

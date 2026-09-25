@@ -22,7 +22,7 @@
 import React, { useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import colors from '../constants/colors';
-import { borderRadius, fontSize, fontWeight, spacing } from '../constants/appConstants';
+import { borderRadius, fontSize, fontWeight, shadows, spacing } from '../constants/appConstants';
 
 const AppSelect = ({
   label,
@@ -44,7 +44,12 @@ const AppSelect = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.labelDot}>●</Text>
+        </View>
+      ) : null}
 
       <Pressable
         style={[styles.field, error && styles.fieldError]}
@@ -53,7 +58,9 @@ const AppSelect = ({
         <Text style={selectedOption ? styles.valueText : styles.placeholderText}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
-        <Text style={styles.chevron}>⌄</Text>
+        <View style={styles.chevronWrap}>
+          <Text style={styles.chevron}>⌄</Text>
+        </View>
       </Pressable>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -66,7 +73,12 @@ const AppSelect = ({
       >
         <Pressable style={styles.overlay} onPress={() => setVisible(false)}>
           <View style={styles.sheet}>
-            {label ? <Text style={styles.sheetTitle}>{label}</Text> : null}
+            <View style={styles.sheetHeader}>
+              {label ? <Text style={styles.sheetTitle}>{label}</Text> : null}
+              <Pressable onPress={() => setVisible(false)} hitSlop={8}>
+                <Text style={styles.sheetClose}>✕</Text>
+              </Pressable>
+            </View>
             <FlatList
               data={options}
               keyExtractor={item => String(item.value)}
@@ -85,7 +97,11 @@ const AppSelect = ({
                     >
                       {item.label}
                     </Text>
-                    {isSelected ? <Text style={styles.check}>✓</Text> : null}
+                    {isSelected ? (
+                      <View style={styles.checkWrap}>
+                        <Text style={styles.check}>✓</Text>
+                      </View>
+                    ) : null}
                   </Pressable>
                 );
               }}
@@ -101,21 +117,31 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.lg,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
   label: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
     color: colors.text,
-    marginBottom: spacing.xs,
+  },
+  labelDot: {
+    fontSize: 6,
+    color: colors.primary,
+    marginLeft: spacing.xs,
+    marginBottom: 2,
   },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md - 2,
     backgroundColor: colors.white,
   },
   fieldError: {
@@ -129,9 +155,18 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.textMuted,
   },
+  chevronWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chevron: {
-    fontSize: fontSize.lg,
-    color: colors.textMuted,
+    fontSize: fontSize.xs,
+    color: colors.primary,
+    marginTop: -2,
   },
   errorText: {
     marginTop: spacing.xs,
@@ -145,24 +180,35 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.white,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
+    borderTopLeftRadius: borderRadius.xxl,
+    borderTopRightRadius: borderRadius.xxl,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xxl,
     paddingHorizontal: spacing.lg,
-    maxHeight: '60%',
+    maxHeight: '62%',
+    ...shadows.floating,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
   },
   sheetTitle: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
     color: colors.text,
-    marginBottom: spacing.md,
+  },
+  sheetClose: {
+    fontSize: fontSize.md,
+    color: colors.textMuted,
   },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -174,9 +220,18 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: fontWeight.semibold,
   },
+  checkWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   check: {
-    color: colors.primary,
+    color: colors.white,
     fontWeight: fontWeight.bold,
+    fontSize: fontSize.xs,
   },
 });
 
