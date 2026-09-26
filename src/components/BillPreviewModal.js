@@ -13,6 +13,7 @@
  */
 import React from 'react';
 import {
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -24,9 +25,17 @@ import {
 import AppButton from './AppButton';
 import colors from '../constants/colors';
 import { borderRadius, fontSize, fontWeight, spacing } from '../constants/appConstants';
+import { BRAND, BRAND_CONTACT_LINES } from '../constants/brand';
 import { formatDateString } from '../utils/date';
 import { formatCurrency, formatLiters } from '../utils/format';
 import { amountToWords } from '../utils/numberToWords';
+import { sortBillTransactions } from '../utils/billTransactions';
+
+// Both images are produced by `npm run build:bill-assets` (see
+// scripts/buildBillBrandAssets.js), which crops the originals to their
+// content and sizes them for print.
+const BRAND_LOGO = require('../../assets/bill/e2e_dairyfarm_logo.png');
+const BRAND_SIGNATURE = require('../../assets/bill/signature.png');
 
 const BillPreviewModal = ({
   visible,
@@ -60,8 +69,9 @@ const BillPreviewModal = ({
   const partyRole = billData.partyRole || (seller ? 'seller' : 'customer');
   const isSeller = partyRole === 'seller';
   const party = seller || customer;
-  const transactions = purchases || sales || [];
   const dateField = billData.dateField || (isSeller ? 'purchaseDate' : 'saleDate');
+  // Oldest → newest, so the preview matches the exported PDF exactly.
+  const transactions = sortBillTransactions(purchases || sales || [], dateField);
 
   const previewTitle = isSeller ? 'Payment Bill Preview' : 'Sales Invoice Preview';
   const billTitleText = isSeller ? 'Payment Bill' : 'Sales Invoice';
@@ -112,20 +122,22 @@ const BillPreviewModal = ({
               <View style={styles.dairyHeader}>
                 <View style={styles.brandRow}>
                   <View style={styles.brandLogo}>
-                    <Text style={styles.brandLogoEmoji}>🐄</Text>
+                    <Image
+                      source={BRAND_LOGO}
+                      style={styles.brandLogoImage}
+                      resizeMode="contain"
+                    />
                   </View>
                   <View>
-                    <Text style={styles.brandName}>Akku Dada Dairy</Text>
-                    <Text style={styles.brandSlogan}>
-                      Healthy Animals | Fresh Milk | Better Tomorrow
-                    </Text>
+                    <Text style={styles.brandName}>{BRAND.name}</Text>
+                    <Text style={styles.brandSlogan}>{BRAND.tagline}</Text>
                   </View>
                 </View>
 
                 <View style={styles.dairyContact}>
-                  <Text style={styles.contactLine}>📍 Bagicha Farm , Gram Khurshipar 487551</Text>
-                  <Text style={styles.contactLine}>📞 +91 9752248080</Text>
-                  <Text style={styles.contactLine}>✉️ info@akkudadadairy.in</Text>
+                  <Text style={styles.contactLine}>📍 {BRAND_CONTACT_LINES[0]}</Text>
+                  <Text style={styles.contactLine}>📞 {BRAND_CONTACT_LINES[1]}</Text>
+                  <Text style={styles.contactLine}>✉️ {BRAND_CONTACT_LINES[2]}</Text>
                 </View>
               </View>
 
@@ -273,10 +285,14 @@ const BillPreviewModal = ({
                 </View>
 
                 <View style={styles.signBlock}>
-                  <Text style={styles.signatureScript}>Akku Dada</Text>
+                  <Image
+                    source={BRAND_SIGNATURE}
+                    style={styles.signatureImage}
+                    resizeMode="contain"
+                  />
                   <View style={styles.signatureLine} />
                   <Text style={styles.signatureTitle}>Authorized Signature</Text>
-                  <Text style={styles.signatureOrg}>Akku Dada Dairy</Text>
+                  <Text style={styles.signatureOrg}>{BRAND.name}</Text>
                 </View>
               </View>
             </View>
@@ -381,15 +397,17 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.sm,
     borderWidth: 1.5,
     borderColor: colors.primary,
+    overflow: 'hidden',
   },
-  brandLogoEmoji: {
-    fontSize: 22,
+  brandLogoImage: {
+    width: '100%',
+    height: '100%',
   },
   brandName: {
     fontSize: fontSize.lg,
@@ -667,14 +685,12 @@ const styles = StyleSheet.create({
   },
   signBlock: {
     alignItems: 'center',
-    width: 110,
+    width: 118,
   },
-  signatureScript: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    fontWeight: fontWeight.bold,
-    color: '#1E3A8A',
-    fontFamily: Platform.OS === 'ios' ? 'Snell Roundhand' : 'serif',
+  signatureImage: {
+    width: 100,
+    height: 65,
+    marginBottom: 2,
   },
   signatureLine: {
     height: 1,

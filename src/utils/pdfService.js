@@ -23,6 +23,8 @@ import Share from 'react-native-share';
 import { generatePdfDataUri, generatePdfBase64 } from './purePdfBuilder';
 import { formatDateString } from './date';
 import { amountToWords } from './numberToWords';
+import { BRAND, BRAND_PHONE_LINE } from '../constants/brand';
+import { sortBillTransactions } from './billTransactions';
 
 export const buildBillTextReceipt = billData => {
   const {
@@ -42,8 +44,9 @@ export const buildBillTextReceipt = billData => {
   const partyRole = billData.partyRole || (seller ? 'seller' : 'customer');
   const isSeller = partyRole === 'seller';
   const party = seller || customer;
-  const transactions = purchases || sales || [];
   const dateField = billData.dateField || (isSeller ? 'purchaseDate' : 'saleDate');
+  // Oldest → newest, like the PDF.
+  const transactions = sortBillTransactions(purchases || sales || [], dateField);
 
   const headingLabel = isSeller ? 'PAYMENT BILL' : 'SALES INVOICE';
   const partyLabel = isSeller ? 'SELLER DETAILS' : 'CUSTOMER DETAILS';
@@ -63,10 +66,10 @@ export const buildBillTextReceipt = billData => {
   const words = amountToWords(totalAmount);
 
   const lines = [
-    `*AKKU DADA DAIRY - ${headingLabel}*`,
-    `Healthy Animals | Fresh Milk | Better Tomorrow`,
-    `Bagicha Farm, Gram Khurshipar 487551`,
-    `Ph: +91 9752248080 | info@akkudadadairy.in`,
+    `*${BRAND.name.toUpperCase()} - ${headingLabel}*`,
+    BRAND.tagline,
+    BRAND.address,
+    `Ph: ${BRAND_PHONE_LINE} | ${BRAND.email}`,
     `----------------------------------------`,
     `*Bill No*   : ${billNumber}`,
     `*Bill Date* : ${formattedBillDate}`,
@@ -97,7 +100,7 @@ export const buildBillTextReceipt = billData => {
   lines.push(`*Payment Mode* : Cash / Bank Transfer`);
   lines.push(`----------------------------------------`);
   lines.push(`Thank you for your continued support!`);
-  lines.push(`- Akku Dada Dairy`);
+  lines.push(`- ${BRAND.name}`);
 
   return lines.join('\n');
 };

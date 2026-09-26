@@ -8,6 +8,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AppCard from '../../components/AppCard';
 import colors from '../../constants/colors';
+import { BRAND } from '../../constants/brand';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import {
   CUSTOMER_ROUTES,
@@ -15,6 +16,8 @@ import {
   EXPENSE_ROUTES,
   MORE_ROUTES,
   SELLER_ROUTES,
+  BREEDING_ROUTES,
+  VACCINE_ROUTES,
 } from '../../navigation/routes';
 
 const MENU_SECTIONS = [
@@ -25,6 +28,8 @@ const MENU_SECTIONS = [
       { label: 'Customers', subtitle: 'Milk customers & accounts', icon: '👥', route: CUSTOMER_ROUTES.LIST },
       { label: 'Employee', subtitle: 'Salaries & pay records', icon: '🧑‍🌾', route: EMPLOYEE_ROUTES.SCREEN },
       { label: 'Expense', subtitle: 'Feed, medicine & misc', icon: '🧾', route: EXPENSE_ROUTES.LIST },
+      { label: 'Breeding', subtitle: 'Breeding & calving records', icon: '🤰', route: BREEDING_ROUTES.LIST },
+      { label: 'Vaccine', subtitle: 'Vaccination records', icon: '💉', route: VACCINE_ROUTES.LIST },
     ],
   },
   {
@@ -46,7 +51,7 @@ const MoreMenuScreen = ({ navigation }) => {
       <AppCard variant="raised" style={styles.hero}>
         <View style={styles.heroCircle1} />
         <View style={styles.heroCircle2} />
-        <Text style={styles.heroTitle}>EiiE</Text>
+        <Text style={styles.heroTitle}>{BRAND.name}</Text>
         <Text style={styles.heroSubtitle}>
           Dairy farm management made simple. Manage your sellers, customers,
           employees and expenses all in one place.

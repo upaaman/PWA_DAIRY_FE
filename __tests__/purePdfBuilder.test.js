@@ -46,14 +46,17 @@ describe('purePdfBuilder pagination sanity check', () => {
     expect(pageCount).toBeGreaterThanOrEqual(2);
 
     // Every stream's declared /Length must match its actual byte length.
-    const streamRegex = /(\d+) 0 obj\n<< \/Length (\d+) >>\nstream\n([\s\S]*?)\nendstream/g;
+    // Content streams open with a bare << /Length ... >> dict; the two
+    // brand images carry a full image XObject dict in front of it.
+    const streamRegex = /(\d+) 0 obj\n(?:<< [\s\S]*?)?\/Length (\d+) >>\nstream\n([\s\S]*?)\nendstream/g;
     let match;
     let streamCount = 0;
     while ((match = streamRegex.exec(pdfString)) !== null) {
       streamCount += 1;
       expect(match[3].length).toBe(parseInt(match[2], 10));
     }
-    expect(streamCount).toBe(pageCount);
+    // One content stream per page + the logo + the signature.
+    expect(streamCount).toBe(pageCount + 2);
 
     // Every xref offset must point at the correct "<id> 0 obj" header.
     const xrefSectionMatch = pdfString.match(/xref\n0 (\d+)\n([\s\S]*?)\ntrailer/);

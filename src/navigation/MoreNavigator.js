@@ -1,7 +1,8 @@
 /**
  * MoreNavigator
  *
- * Stack for the "More" tab: Menu -> Profile / Settings.
+ * Stack for the "More" tab: Menu -> Profile / Settings / Sellers /
+ * Customers / Employees / Expenses / Breeding / Vaccine.
  */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -24,6 +25,11 @@ import AddSalaryScreen from '../screens/Employees/AddSalaryScreen';
 import AddSalaryTransactionScreen from '../screens/Employees/AddSalaryTransactionScreen';
 import ExpenseListScreen from '../screens/Expenses/ExpenseListScreen';
 import AddExpenseScreen from '../screens/Expenses/AddExpenseScreen';
+import BreedingListScreen from '../screens/Breeding/BreedingListScreen';
+import AddBreedingScreen from '../screens/Breeding/AddBreedingScreen';
+import EditBreedingScreen from '../screens/Breeding/EditBreedingScreen';
+import VaccineListScreen from '../screens/Vaccines/VaccineListScreen';
+import AddVaccineScreen from '../screens/Vaccines/AddVaccineScreen';
 import { stackScreenOptions } from './navigationTheme';
 import {
   MORE_ROUTES,
@@ -31,6 +37,8 @@ import {
   CUSTOMER_ROUTES,
   EMPLOYEE_ROUTES,
   EXPENSE_ROUTES,
+  BREEDING_ROUTES,
+  VACCINE_ROUTES,
 } from './routes';
 
 const Stack = createNativeStackNavigator();
@@ -131,6 +139,31 @@ const MoreNavigator = () => (
       name={EXPENSE_ROUTES.ADD}
       component={AddExpenseScreen}
       options={{ title: 'Add Expense' }}
+    />
+    <Stack.Screen
+      name={BREEDING_ROUTES.LIST}
+      component={BreedingListScreen}
+      options={{ title: 'Breeding' }}
+    />
+    <Stack.Screen
+      name={BREEDING_ROUTES.ADD}
+      component={AddBreedingScreen}
+      options={{ title: 'Add Breeding' }}
+    />
+    <Stack.Screen
+      name={BREEDING_ROUTES.EDIT}
+      component={EditBreedingScreen}
+      options={{ title: 'Update Breeding' }}
+    />
+    <Stack.Screen
+      name={VACCINE_ROUTES.LIST}
+      component={VaccineListScreen}
+      options={{ title: 'Vaccine' }}
+    />
+    <Stack.Screen
+      name={VACCINE_ROUTES.ADD}
+      component={AddVaccineScreen}
+      options={{ title: 'Add Vaccine' }}
     />
   </Stack.Navigator>
 );

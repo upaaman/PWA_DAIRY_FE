@@ -91,3 +91,16 @@ export const EXPENSE_ROUTES = {
   LIST: 'ExpenseList',
   ADD: 'AddExpense',
 };
+
+// Breeding stack (nested inside the More stack, below Expense)
+export const BREEDING_ROUTES = {
+  LIST: 'BreedingList',
+  ADD: 'AddBreeding',
+  EDIT: 'EditBreeding',
+};
+
+// Vaccine stack (nested inside the More stack, below Breeding)
+export const VACCINE_ROUTES = {
+  LIST: 'VaccineList',
+  ADD: 'AddVaccine',
+};

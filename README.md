@@ -77,6 +77,25 @@ When you want to forcefully reload, for example to reset the state of your app, 
 
 You've successfully run and modified your React Native App. :partying_face:
 
+## Bill branding
+
+Name, address, phone numbers and email live in one place — `src/constants/brand.js` — and are used by the generated PDF, the in-app bill preview, the HTML template and the plain-text receipt. Change it there and every bill updates.
+
+The logo and signature are embedded in the PDF itself (the builder is pure JS, so the pixel data is pre-compressed and shipped as data). They come from:
+
+```bash
+npm run build:bill-assets
+# or point it at other files:
+npm run build:bill-assets -- /path/to/logo.png /path/to/signature.png
+```
+
+That Node script (`scripts/buildBillBrandAssets.js`) crops the source images to their content, resizes them for print, and writes:
+
+- `assets/bill/*.png` — used by the in-app preview via `<Image>`
+- `src/assets/billBrandImages.js` — **generated**, the deflated pixel data the PDF builder embeds
+
+Both outputs are committed, so you only need to re-run this after changing the artwork.
+
 ### Now what?
 
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).

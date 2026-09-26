@@ -4,7 +4,11 @@
  * Pure JavaScript PDF generator that builds standard PDF 1.4 binary documents
  * with zero native dependencies or external packages.
  *
- * Generates high-fidelity payment bills matching the Akku Dada Dairy design.
+ * Generates high-fidelity payment bills for EiiE Dairyfarm, complete with the
+ * real logo in the header and the authorised signature above the sign-off
+ * line. The artwork is embedded as image XObjects; the pixel data ships
+ * pre-deflated in src/assets/billBrandImages.js (see
+ * scripts/buildBillBrandAssets.js) so nothing has to be compressed here.
  *
  * Supports multiple pages: the transaction table automatically flows onto
  * additional pages when it doesn't fit on one, each continuation page gets
@@ -14,6 +18,11 @@
  */
 import { formatDateString } from './date';
 import { amountToWords } from './numberToWords';
+import { BRAND, BRAND_CONTACT_LINES } from '../constants/brand';
+import BRAND_IMAGES from '../assets/billBrandImages';
+import { sortBillTransactions } from './billTransactions';
+import { base64ToBinaryString } from './pdfImage';
+import { measurePdfText } from './pdfText';
 
 // Base64 encoding helper for pure JS environments
 const btoa = input => {
@@ -54,8 +63,45 @@ const ROW_HEIGHT = 18;
 const FIRST_PAGE_TABLE_START_Y = 582;
 const CONTINUATION_TABLE_START_Y = 770;
 // Space reserved for the Total row + Amount/Payment summary cards +
-// footer/signature block (see drawFooterBlock below).
-const FOOTER_BLOCK_HEIGHT = 230;
+// footer/signature block (see the footer code below).
+const FOOTER_BLOCK_HEIGHT = 250;
+// Right edge of the printable area — the brand block is right-aligned to it.
+const CONTENT_RIGHT = 559;
+
+// The brand artwork, decoded on first use. `decoded` is the raw zlib
+// stream the PDF hands straight to the viewer; `width`/`height` are the
+// pixel dimensions used for the aspect ratio. Decoding is memoised so the
+// ~60 KB payload is only turned into bytes when a bill is actually built.
+const artworkCache = {};
+
+const getArtwork = key => {
+  if (artworkCache[key] === undefined) {
+    const image = BRAND_IMAGES[key];
+    artworkCache[key] = image ? { ...image, decoded: base64ToBinaryString(image.data) } : null;
+  }
+  return artworkCache[key];
+};
+
+// Rendered height of the logo in the header (points). Width follows from
+// the source aspect ratio.
+const LOGO_HEIGHT = 40;
+const CONTINUATION_LOGO_HEIGHT = 18;
+// Rendered height of the signature sitting above the sign-off line.
+const SIGNATURE_HEIGHT = 56;
+
+/**
+ * Image XObject dictionary for a pre-deflated 8-bit RGB image.
+ *
+ * `/Predictor 15` tells the reader the inflated data is PNG-row-filtered
+ * (see scripts/buildBillBrandAssets.js) so it undoes the filtering after
+ * inflating. Declaring the filter means the device never has to compress
+ * anything itself.
+ */
+const imageXObjectDict = image =>
+  `<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} ` +
+  `/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode ` +
+  `/DecodeParms << /Predictor 15 /Colors 3 /BitsPerComponent 8 /Columns ${image.width} >> ` +
+  `/Length ${image.decoded.length} >>`;
 
 export const generatePdfBase64 = billData => {
   const {
@@ -78,8 +124,10 @@ export const generatePdfBase64 = billData => {
   const partyRole = billData.partyRole || (seller ? 'seller' : 'customer');
   const isSeller = partyRole === 'seller';
   const party = seller || customer;
-  const transactions = purchases || sales || [];
   const dateField = billData.dateField || (isSeller ? 'purchaseDate' : 'saleDate');
+  // Bills always read oldest → newest (01 → 30), independent of the order
+  // the calling screen listed the records in.
+  const transactions = sortBillTransactions(purchases || sales || [], dateField);
 
   const billTitle = isSeller ? 'Payment Bill' : 'Sales Invoice';
   const billSubtitle = isSeller ? '(To be paid to Seller)' : '(To be paid by Customer)';
@@ -131,6 +179,37 @@ export const generatePdfBase64 = billData => {
     setFillColor(r, g, b);
     ops.push(`BT /${font} ${size} Tf ${x.toFixed(2)} ${y.toFixed(2)} Td (${escapePdfText(text)}) Tj ET`);
   };
+  // Draws an image XObject into the given box — `name` is the resource key
+  // (see the /XObject dict in the object graph below).
+  const drawImage = (name, x, y, width, height) => {
+    ops.push('q');
+    ops.push(`${width.toFixed(2)} 0 0 ${height.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm`);
+    ops.push(`/${name} Do`);
+    ops.push('Q');
+  };
+  // Right-aligned text: measures the string and places it flush with
+  // `right`, so the header can grow a second phone number without any
+  // coordinate tweaking or risk of running off the page.
+  const drawTextRight = (font, size, right, y, text, r, g, b) => {
+    drawText(font, size, right - measurePdfText(font, size, text), y, text, r, g, b);
+  };
+  // The EiiE Dairyfarm logo, sized by height, with its left edge at `x`.
+  const drawLogo = (x, y, height) => {
+    const logo = getArtwork('logo');
+    if (!logo || !logo.width || !logo.height) {
+      return;
+    }
+    drawImage('LogoImg', x, y, height * (logo.width / logo.height), height);
+  };
+  // The authorised signature, sitting on top of the sign-off line.
+  const drawSignature = (bottomY, height, right = 550) => {
+    const signature = getArtwork('signature');
+    if (!signature || !signature.width || !signature.height) {
+      return;
+    }
+    const width = height * (signature.width / signature.height);
+    drawImage('SignatureImg', right - width, bottomY, width, height);
+  };
 
   // Full brand header + title/meta + party details — page 1 only.
   const drawFullHeader = () => {
@@ -139,20 +218,24 @@ export const generatePdfBase64 = billData => {
     setLineWidth(2);
     drawLine(36, 750, 559, 750);
 
-    // Logo circle badge
-    setFillColor(0.906, 0.961, 0.925); // #E7F5EC
-    setStrokeColor(0.122, 0.427, 0.243);
-    drawRect(36, 756, 42, 42, true, true);
-    drawText('F2', 12, 44, 772, 'ADD', 0.122, 0.427, 0.243);
+    // Real logo (falls back to the initials badge if the asset is missing)
+    if (getArtwork('logo')) {
+      drawLogo(36, 756, LOGO_HEIGHT);
+    } else {
+      setFillColor(0.906, 0.961, 0.925); // #E7F5EC
+      setStrokeColor(0.122, 0.427, 0.243);
+      drawRect(36, 756, 42, 42, true, true);
+      drawText('F2', 12, 44, 772, 'EiiE', 0.122, 0.427, 0.243);
+    }
 
     // Brand text
-    drawText('F2', 20, 86, 782, 'Akku Dada Dairy', 0.075, 0.306, 0.180); // #134e2e
-    drawText('F3', 8.5, 86, 768, 'Healthy Animals | Fresh Milk | Better Tomorrow', 0.122, 0.427, 0.243);
+    drawText('F2', 20, 86, 782, BRAND.name, 0.075, 0.306, 0.180); // #134e2e
+    drawText('F3', 8.5, 86, 768, BRAND.tagline, 0.122, 0.427, 0.243);
 
     // Contact Info (Right aligned)
-    drawText('F1', 8, 370, 792, 'Bagicha Farm , Gram Khurshipar 487551', 0.278, 0.333, 0.412);
-    drawText('F1', 8, 435, 778, '+91 9752248080', 0.278, 0.333, 0.412);
-    drawText('F1', 8, 410, 764, 'info@akkudadadairy.in', 0.278, 0.333, 0.412);
+    drawTextRight('F1', 8, CONTENT_RIGHT, 792, BRAND_CONTACT_LINES[0], 0.278, 0.333, 0.412);
+    drawTextRight('F1', 8, CONTENT_RIGHT, 778, BRAND_CONTACT_LINES[1], 0.278, 0.333, 0.412);
+    drawTextRight('F1', 8, CONTENT_RIGHT, 764, BRAND_CONTACT_LINES[2], 0.278, 0.333, 0.412);
 
     // Title & Bill Metadata
     drawText('F2', 24, 36, 712, billTitle, 0.118, 0.227, 0.541); // #1e3a8a
@@ -195,11 +278,12 @@ export const generatePdfBase64 = billData => {
 
   // Slim repeated header for continuation pages (2, 3, ...).
   const drawContinuationHeader = () => {
-    drawText('F2', 14, 36, 812, 'Akku Dada Dairy', 0.075, 0.306, 0.180);
+    drawLogo(36, 810, CONTINUATION_LOGO_HEIGHT);
+    drawText('F2', 14, 62, 812, BRAND.name, 0.075, 0.306, 0.180);
     drawText(
       'F1',
       9,
-      36,
+      62,
       798,
       `${billTitle} · Bill No: ${billNumber} · Page ${pageNumber}`,
       0.278,
@@ -315,7 +399,7 @@ export const generatePdfBase64 = billData => {
   drawText('F2', 8, 298, currentY - 46, 'Remarks', 0.392, 0.455, 0.545);
   drawText('F1', 8, 365, currentY - 46, `: ${remarksLabel} (${formattedStartDate} - ${formattedEndDate})`, 0.059, 0.090, 0.165);
 
-  currentY -= 80;
+  currentY -= 110;
 
   // Footer & Signature
   setStrokeColor(0.796, 0.835, 0.882);
@@ -324,23 +408,24 @@ export const generatePdfBase64 = billData => {
   drawText('F3', 10, 36, currentY - 18, 'Thank you for your continued support!', 0.075, 0.306, 0.180);
   drawText('F1', 8, 36, currentY - 30, 'Your contribution helps us deliver fresh and quality dairy products.', 0.278, 0.333, 0.412);
 
-  // Signature line
+  // Signature line, with the real signature resting on it
   setStrokeColor(0.200, 0.255, 0.333);
-  drawLine(430, currentY - 26, 550, currentY - 26);
-  drawText('F2', 8, 442, currentY - 36, 'Authorized Signature', 0.059, 0.090, 0.165);
-  drawText('F1', 7.5, 452, currentY - 46, 'Akku Dada Dairy', 0.392, 0.455, 0.545);
+  drawLine(430, currentY - 28, 550, currentY - 28);
+  drawSignature(currentY - 28, SIGNATURE_HEIGHT);
+  drawText('F2', 8, 442, currentY - 38, 'Authorized Signature', 0.059, 0.090, 0.165);
+  drawText('F1', 7.5, 452, currentY - 48, BRAND.name, 0.392, 0.455, 0.545);
 
   // Decorative green bottom stripe
   setFillColor(0.122, 0.427, 0.243);
-  drawRect(36, currentY - 58, 523, 6, true, false);
+  drawRect(36, currentY - 60, 523, 6, true, false);
 
   // Finalize the last (in-progress) page.
   pages.push(ops);
 
   // ---- Construct the multi-page PDF object graph ----
   // ids 1 & 2 are reserved for the Catalog and Pages tree; each page
-  // then gets a Page object + its own Contents stream object, and the
-  // three shared fonts come last.
+  // then gets a Page object + its own Contents stream object, the three
+  // shared fonts come next and the brand images last.
   const numPages = pages.length;
   let nextId = 3;
   const pageIds = [];
@@ -352,6 +437,22 @@ export const generatePdfBase64 = billData => {
   const fontF1Id = nextId++;
   const fontF2Id = nextId++;
   const fontF3Id = nextId++;
+
+  // Brand artwork. Declared as resources on every page (harmless — a reader
+  // only draws what the content stream references) so the header logo,
+  // continuation header logo and footer signature can all use them without
+  // having to know which page they landed on.
+  const logoImage = getArtwork('logo');
+  const signatureImage = getArtwork('signature');
+  const logoImageId = logoImage ? nextId++ : 0;
+  const signatureImageId = signatureImage ? nextId++ : 0;
+  const xObjectResources = [
+    logoImageId ? `/LogoImg ${logoImageId} 0 R` : null,
+    signatureImageId ? `/SignatureImg ${signatureImageId} 0 R` : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   const totalObjects = nextId - 1;
 
   const objects = {};
@@ -363,7 +464,8 @@ export const generatePdfBase64 = billData => {
     const contentId = contentIds[i];
     objects[pageId] =
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] ` +
-      `/Contents ${contentId} 0 R /Resources << /Font << /F1 ${fontF1Id} 0 R /F2 ${fontF2Id} 0 R /F3 ${fontF3Id} 0 R >> >> >>`;
+      `/Contents ${contentId} 0 R /Resources << /Font << /F1 ${fontF1Id} 0 R /F2 ${fontF2Id} 0 R ` +
+      `/F3 ${fontF3Id} 0 R >>${xObjectResources ? ` /XObject << ${xObjectResources} >>` : ''} >> >>`;
 
     const streamContent = pageOps.join('\n');
     objects[contentId] = `<< /Length ${streamContent.length} >>\nstream\n${streamContent}\nendstream`;
@@ -372,6 +474,14 @@ export const generatePdfBase64 = billData => {
   objects[fontF1Id] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`;
   objects[fontF2Id] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>`;
   objects[fontF3Id] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>`;
+
+  if (logoImageId) {
+    objects[logoImageId] = `${imageXObjectDict(logoImage)}\nstream\n${logoImage.decoded}\nendstream`;
+  }
+  if (signatureImageId) {
+    objects[signatureImageId] =
+      `${imageXObjectDict(signatureImage)}\nstream\n${signatureImage.decoded}\nendstream`;
+  }
 
   let pdfString = '%PDF-1.4\n';
   const offsets = {};

@@ -1,11 +1,13 @@
 /**
  * billTemplate.js
  *
- * Generates high-fidelity HTML for the Seller Payment Bill matching the
- * reference sample layout (Akku Dada Dairy Payment Bill).
+ * Generates high-fidelity HTML for the EiiE Dairyfarm Payment Bill,
+ * matching the layout the app's PDF builder produces.
  */
 import { formatDateString } from './date';
 import { amountToWords } from './numberToWords';
+import { BRAND, BRAND_CONTACT_LINES } from '../constants/brand';
+import { sortBillTransactions } from './billTransactions';
 
 export const generateBillHtml = ({
   billNumber,
@@ -30,7 +32,9 @@ export const generateBillHtml = ({
   const formattedEndDate = endDate ? formatDateString(endDate) : '—';
   const words = amountToWords(totalAmount);
 
-  const rowsHtml = purchases
+  // Bills read as a ledger: oldest entry first, no matter how the calling
+  // screen ordered the records.
+  const rowsHtml = sortBillTransactions(purchases, 'purchaseDate')
     .map((item, index) => {
       const dateFormatted = item.purchaseDate
         ? formatDateString(item.purchaseDate)
@@ -398,23 +402,23 @@ export const generateBillHtml = ({
         <ellipse cx="60" cy="58" rx="7" ry="5" fill="#4CAF50"/>
       </svg>
       <div>
-        <div class="brand-title">Akku Dada Dairy</div>
-        <div class="brand-tagline">Healthy Animals | Fresh Milk | Better Tomorrow</div>
+        <div class="brand-title">${BRAND.name}</div>
+        <div class="brand-tagline">${BRAND.tagline}</div>
       </div>
     </div>
 
     <div class="contact-info">
       <div class="contact-item">
         <span class="contact-icon">📍</span>
-        <span>Bagicha Farm , Gram Khurshipar 487551</span>
+        <span>${BRAND_CONTACT_LINES[0]}</span>
       </div>
       <div class="contact-item">
         <span class="contact-icon">📞</span>
-        <span>+91 9752248080</span>
+        <span>${BRAND_CONTACT_LINES[1]}</span>
       </div>
       <div class="contact-item">
         <span class="contact-icon">✉️</span>
-        <span>info@akkudadadairy.in</span>
+        <span>${BRAND_CONTACT_LINES[2]}</span>
       </div>
     </div>
   </div>
@@ -528,7 +532,7 @@ export const generateBillHtml = ({
         <path d="M10 25 C 25 10, 35 35, 50 15 C 65 5, 75 30, 95 18 C 105 12, 110 22, 115 20" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round" fill="none"/>
       </svg>
       <div class="signature-line">Authorized Signature</div>
-      <div class="signature-org">Akku Dada Dairy</div>
+      <div class="signature-org">${BRAND.name}</div>
     </div>
   </div>
 

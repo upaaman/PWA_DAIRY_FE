@@ -7,8 +7,13 @@
  * Data comes from a single real backend endpoint:
  *   GET /animal/get/{id}?startDate={date}&endDate={date}
  *   (AnimalController.getAnimalById) which returns the animal profile,
- *   milkProductionList, expenseRecordOfAnimal, totalMilkProduced and
- *   totalExpense — all filtered by the selected date range.
+ *   milkProductionList, expenseRecordOfAnimal, totalMilkProduced,
+ *   totalExpense and the lineage (mother + childAnimals) — all filtered
+ *   by the selected date range.
+ *
+ * The "Family" section is only rendered when the animal actually has a
+ * mother or children; tapping a relative opens that animal's own details
+ * page (pushed, so the back stack returns here).
  *
  * Edit uses:
  *   navigation -> EditAnimalScreen -> PATCH /animal/update/{id}
@@ -40,6 +45,7 @@ import { bucketByDay, computeShiftBreakdown } from './animalProductionMeta';
 import DetailRow from './DetailRow';
 import ExpenseRecordRow from './ExpenseRecordRow';
 import ProductionRecordRow from './ProductionRecordRow';
+import RelatedAnimalRow from './RelatedAnimalRow';
 import SectionTabs from './SectionTabs';
 import StatBreakdownRow from '../MilkProduction/StatBreakdownRow';
 
@@ -80,6 +86,7 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       const response = await get(
         `/animal/get/${animalId}?startDate=${startDate}&endDate=${endDate}`,
       );
+      console.log(response,'res')
       setAnimal(response);
     } catch (err) {
       setAnimalError(err);
@@ -103,6 +110,17 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     });
   }, [navigation, animal]);
 
+  // Opens a relative (mother / child) in its own details page. `push` is
+  // used rather than `navigate` because this screen is already the focused
+  // route: navigate() would just overwrite this route's params and lose
+  // the current animal from the back stack.
+  const handleRelatedPress = useCallback(
+    related => {
+      navigation.push(ANIMALS_ROUTES.DETAILS, { animalId: related.id });
+    },
+    [navigation],
+  );
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -119,6 +137,22 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     [animal],
   );
 
+  // Lineage from the same payload: `mother` is a single animal (or null),
+  // `childAnimals` a list (or null). Self-references are dropped — the
+  // backend can hand the animal back on both sides, and an animal is never
+  // its own mother/child, so those rows would just link to this page.
+  const mother = useMemo(
+    () =>
+      animal?.mother && animal.mother.id !== animal.id ? animal.mother : null,
+    [animal],
+  );
+  const childAnimals = useMemo(() => {
+    const children = animal?.childAnimals;
+    if (!Array.isArray(children)) {
+      return [];
+    }
+    return children.filter(child => child && child.id !== animal.id);
+  }, [animal]);
   const totalProduction = useMemo(
     () => records.reduce((sum, record) => sum + Number(record.quantity || 0), 0),
     [records],
@@ -233,6 +267,51 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
         <DetailRow label="Purchase Price" value={formatCurrency(animal.purchasePrice)} />
         {animal.notes ? <DetailRow label="Notes" value={animal.notes} /> : null}
       </AppCard>
+
+      {mother || childAnimals.length > 0 ? (
+        <AppCard style={styles.section}>
+          <View style={styles.familyHeader}>
+            <View style={styles.familyTitleRow}>
+              <Text style={styles.sectionTitle}>Family</Text>
+              <View style={styles.familyCountPill}>
+                <Text style={styles.familyCountText}>
+                  {`${(mother ? 1 : 0) + childAnimals.length} linked`}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.familyHint}>
+              Tap a relative to open its details
+            </Text>
+          </View>
+
+          {mother ? (
+            <View style={styles.familyGroup}>
+              <Text style={styles.familyGroupLabel}>Mother</Text>
+              <RelatedAnimalRow
+                animal={mother}
+                onPress={() => handleRelatedPress(mother)}
+              />
+            </View>
+          ) : null}
+
+          {childAnimals.length > 0 ? (
+            <View style={styles.familyGroup}>
+              <Text style={styles.familyGroupLabel}>
+                {childAnimals.length === 1
+                  ? 'Child'
+                  : `Children (${childAnimals.length})`}
+              </Text>
+              {childAnimals.map((child, index) => (
+                <RelatedAnimalRow
+                  key={child.id || index}
+                  animal={child}
+                  onPress={() => handleRelatedPress(child)}
+                />
+              ))}
+            </View>
+          ) : null}
+        </AppCard>
+      ) : null}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Animal Overview</Text>
@@ -445,6 +524,46 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.semibold,
     color: colors.text,
     marginBottom: spacing.sm,
+  },
+  familyHeader: {
+    marginBottom: spacing.xs,
+  },
+  familyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  familyCountPill: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 2,
+    marginLeft: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  familyCountText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    color: colors.primary,
+  },
+  familyHint: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+  },
+  familyGroup: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  familyGroupLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.sm,
   },
   statsRow: {
     flexDirection: 'row',
