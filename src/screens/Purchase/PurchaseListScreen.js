@@ -75,7 +75,14 @@ const PurchaseListScreen = ({ navigation }) => {
       <FlatList
         data={purchases}
         keyExtractor={item => String(item.id)}
-        renderItem={({ item }) => <PurchaseListItem purchase={item} />}
+        renderItem={({ item }) => (
+          <PurchaseListItem
+            purchase={item}
+            onPress={() =>
+              navigation.navigate(PURCHASE_ROUTES.DETAILS, { purchase: item })
+            }
+          />
+        )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <EmptyState

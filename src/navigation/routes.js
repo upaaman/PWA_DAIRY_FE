@@ -39,6 +39,8 @@ export const PRODUCTION_ROUTES = {
 export const PURCHASE_ROUTES = {
   LIST: 'PurchaseList',
   ADD: 'AddPurchase',
+  DETAILS: 'PurchaseDetails',
+  EDIT: 'EditPurchase',
 };
 
 // Sales stack
