@@ -214,16 +214,34 @@ const chunk = (type, data) => {
   return Buffer.concat([length, body, crc]);
 };
 
-const encodePng = ({ width, height, rgb }) => {
-  const stride = width * 3;
+// Writes a non-interlaced 8-bit PNG. `rgb` holds 3 bytes per pixel, or
+// `alpha` may be supplied alongside it (1 byte per pixel) to emit a
+// truecolour-with-alpha image instead — the launcher icon's round variant
+// needs that, the bill artwork does not.
+const encodePng = ({ width, height, rgb, alpha }) => {
+  // Interleave the alpha plane in first, so the filter pass below always
+  // walks one already-correctly-strided buffer.
+  let planes = rgb;
+  if (alpha) {
+    planes = Buffer.alloc(width * height * 4);
+    for (let i = 0; i < width * height; i += 1) {
+      planes[i * 4] = rgb[i * 3];
+      planes[i * 4 + 1] = rgb[i * 3 + 1];
+      planes[i * 4 + 2] = rgb[i * 3 + 2];
+      planes[i * 4 + 3] = alpha[i];
+    }
+  }
+
+  const channels = alpha ? 4 : 3;
+  const stride = width * channels;
   // Filter type 1 (Sub) per row — cheap and effective on flat art.
   const raw = Buffer.alloc(height * (stride + 1));
   for (let y = 0; y < height; y += 1) {
     const rowStart = y * (stride + 1);
     raw[rowStart] = 1;
     for (let x = 0; x < stride; x += 1) {
-      const value = rgb[y * stride + x];
-      const left = x >= 3 ? rgb[y * stride + x - 3] : 0;
+      const value = planes[y * stride + x];
+      const left = x >= channels ? planes[y * stride + x - channels] : 0;
       raw[rowStart + 1 + x] = (value - left) & 0xff;
     }
   }
@@ -232,7 +250,7 @@ const encodePng = ({ width, height, rgb }) => {
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
   ihdr[8] = 8; // bit depth
-  ihdr[9] = 2; // colour type: truecolour
+  ihdr[9] = channels === 4 ? 6 : 2; // truecolour (+/- alpha)
   ihdr[10] = 0; // deflate
   ihdr[11] = 0; // adaptive filtering
   ihdr[12] = 0; // no interlace
@@ -534,4 +552,15 @@ export default BILL_BRAND_IMAGES;
   console.log(`wrote ${path.relative(ROOT, assetDir)}/*.png`);
 };
 
-main();
+// The PNG helpers are shared with scripts/buildAppIcons.js.
+module.exports = {
+  decodePng,
+  encodePng,
+  contentBox,
+  resizeRgba,
+  flattenToWhite,
+};
+
+if (require.main === module) {
+  main();
+}

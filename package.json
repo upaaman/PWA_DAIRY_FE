@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "build:bill-assets": "node scripts/buildBillBrandAssets.js"
+    "build:bill-assets": "node scripts/buildBillBrandAssets.js",
+    "build:app-icons": "node scripts/buildAppIcons.js"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "^9.2.1",

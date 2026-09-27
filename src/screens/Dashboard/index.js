@@ -10,6 +10,11 @@
  *
  * No mock data and no "Recent Activity" section — every value shown
  * here comes directly from the API response above.
+ *
+ * The filter opens on Today, not This Month: the home tab is a "how is
+ * the farm doing right now" glance, and a day is the window a user
+ * checking in between milk rounds actually cares about. Every other
+ * screen that owns a date filter still defaults to This Month.
  */
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -29,8 +34,8 @@ import useDashboardData from './useDashboardData';
 
 const DashboardScreen = () => {
   const [range, setRange] = useState(() => ({
-    rangeKey: RANGE_KEYS.THIS_MONTH,
-    ...getDateRangeForKey(RANGE_KEYS.THIS_MONTH),
+    rangeKey: RANGE_KEYS.TODAY,
+    ...getDateRangeForKey(RANGE_KEYS.TODAY),
   }));
 
   const { data, loading, error, reload } = useDashboardData(range);

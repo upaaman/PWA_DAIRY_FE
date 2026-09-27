@@ -96,6 +96,32 @@ That Node script (`scripts/buildBillBrandAssets.js`) crops the source images to 
 
 Both outputs are committed, so you only need to re-run this after changing the artwork.
 
+## App name & launcher icon
+
+The name under the icon is **EiiE**. It is set in three places, all of which must agree:
+
+- `app.json` → `displayName` (used by the React Native CLI)
+- `android/app/src/main/res/values/strings.xml` → `app_name`
+- `ios/FeDairy/Info.plist` → `CFBundleDisplayName`
+
+`app.json`'s `name` and the native project names stay `FeDairy` — they are internal identifiers, not user-facing.
+
+The icon itself is generated from the same logo as the bill:
+
+```bash
+npm run build:app-icons
+# or point it at another file:
+npm run build:app-icons -- /path/to/logo.png
+```
+
+`scripts/buildAppIcons.js` centres the badge on a white square and writes:
+
+- `assets/app-icon.png` — the 1024×1024 master, committed so the icons can be rebuilt later
+- `ios/FeDairy/Images.xcassets/AppIcon.appiconset/Icon-*.png` — opaque, as iOS requires
+- `android/app/src/main/res/mipmap-*/ic_launcher.png` and `ic_launcher_round.png` — the round one is masked to a circle
+
+Tweak `BADGE_RATIO` in the script to change how much of the square the logo fills (0.74 leaves room for the rounded masks both platforms apply). Rebuild, then reinstall the app — launchers cache icons aggressively, so an uninstall is often needed to see the change.
+
 ### Now what?
 
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
