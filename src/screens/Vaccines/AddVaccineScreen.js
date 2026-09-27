@@ -64,7 +64,7 @@ const AddVaccineScreen = ({ navigation }) => {
     try {
       setAnimalsLoading(true);
       setAnimalsError(null);
-      const response = await get('/animal/getAll');
+      const response = await get('/animal/getAll?includeInactiveAsWell=true');
       setAnimals(Array.isArray(response) ? response : []);
     } catch (err) {
       setAnimalsError(err);

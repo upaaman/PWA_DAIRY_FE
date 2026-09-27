@@ -171,10 +171,10 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
 
 
   
-  const chartData = useMemo(
-    () => bucketByDay(records, range.startDate, range.endDate),
-    [records, range.startDate, range.endDate],
-  );
+  // const chartData = useMemo(
+  //   () => bucketByDay(records, range.startDate, range.endDate),
+  //   [records, range.startDate, range.endDate],
+  // );
   
   const shiftBreakdown = useMemo(() => computeShiftBreakdown(records), [records]);
   
@@ -332,14 +332,14 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
           {activeTab === 'OVERVIEW' ? (
             <>
               <Text style={styles.chartTitle}>Milk Production (Liters)</Text>
-              {chartData.length > 0 ? (
+              {/* {chartData.length > 0 ? (
                 <SimpleBarChart data={chartData} />
               ) : (
                 <EmptyState
                   title="No data"
                   message="No production records for this period."
                 />
-              )}
+              )} */}
 
               <View style={styles.statsRow}>
                 <View style={styles.statBox}>
@@ -594,12 +594,12 @@ const styles = StyleSheet.create({
   tabContent: {
     marginTop: spacing.md,
   },
-  chartTitle: {
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.semibold,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
+  // chartTitle: {
+  //   fontSize: fontSize.sm,
+  //   fontWeight: fontWeight.semibold,
+  //   color: colors.text,
+  //   marginBottom: spacing.xs,
+  // },
   shiftSection: {
     marginTop: spacing.sm,
   },
