@@ -10,20 +10,21 @@
  * Takes the EiiE Dairyfarm badge (a transparent PNG), centres it on a
  * white square, and writes every size the two platforms ask for:
  *
- *   assets/app-icon.png                 1024x1024 master, kept in the repo
- *                                       so the icons can be rebuilt later
+ *   assets/app-icon.png                 1024x1024 generated master
  *   ios/FeDairy/Images.xcassets/
  *     AppIcon.appiconset/Icon-*.png     opaque — iOS rejects alpha
  *   android/app/src/main/res/mipmap-<density>/
  *     ic_launcher.png                   opaque square
  *     ic_launcher_round.png             circular, transparent surround
+ *     ic_launcher_foreground.png        108dp adaptive layer
+ *   android/app/src/main/res/mipmap-anydpi-v26/
+ *     ic_launcher*.xml                  adaptive icon definitions
  *
  * The badge is only ~592px wide, so the master is a mild upscale of it;
  * sampling is bilinear in premultiplied space so the edges stay clean.
  * Nothing here runs on the device — the app just ships the PNGs.
  */
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 
 const { decodePng, encodePng, contentBox } = require('./buildBillBrandAssets');
@@ -39,17 +40,12 @@ const IOS_APPICON_DIR = path.join(
 const ANDROID_RES = path.join(ROOT, 'android', 'app', 'src', 'main', 'res');
 const MASTER_FILE = path.join(ROOT, 'assets', 'app-icon.png');
 
-const DEFAULT_SOURCE = path.join(
-  os.homedir(),
-  'Downloads',
-  'e2e_dairyfarm_logo_transparent.png',
-);
+const DEFAULT_SOURCE = path.join(ROOT, 'assets', 'app-logo-source.png');
 
-// How much of the square the badge spans. iOS rounds the corners away
-// and Android's own mask does the same, so the logo is kept well clear
-// of the edges: at 0.74 the badge's corners still fall inside the
-// circle a round launcher icon cuts out.
-const BADGE_RATIO = 0.74;
+// Larger artwork for legacy Android and iOS icons. Modern Android uses
+// a separate 108dp adaptive canvas: its central 72dp is the visible mask.
+const BADGE_RATIO = 0.86;
+const ADAPTIVE_BADGE_RATIO = 0.60;
 const MASTER_SIZE = 1024;
 const BACKGROUND = [255, 255, 255];
 
@@ -136,8 +132,8 @@ const resampleBilinear = (image, box, targetWidth, targetHeight) => {
 // White square, badge centred, optionally clipped to a circle. Returns
 // the planes `encodePng` wants: always RGB, plus alpha for the round
 // Android variant.
-const composeIcon = (source, box, size, { round }) => {
-  const badgeWidth = Math.round(size * BADGE_RATIO);
+const composeIcon = (source, box, size, { round, badgeRatio = BADGE_RATIO }) => {
+  const badgeWidth = Math.round(size * badgeRatio);
   const badgeHeight = Math.max(
     1,
     Math.round((badgeWidth * box.height) / box.width),
@@ -211,7 +207,7 @@ const main = () => {
 
   const written = [];
 
-  // 1. The master, so the icons can be rebuilt without ~/Downloads.
+  // 1. Generated master. The original source is also stored in assets.
   written.push(
     writeIcon(MASTER_FILE, composeIcon(decoded, box, MASTER_SIZE, {})),
   );
@@ -242,6 +238,27 @@ const main = () => {
         composeIcon(decoded, box, size, { round: true }),
       ),
     );
+  });
+
+  // Adaptive icons avoid Android wrapping/shrinking a legacy icon again.
+  ANDROID_DENSITIES.forEach(({ dir, size }) => {
+    written.push(writeIcon(
+      path.join(ANDROID_RES, dir, 'ic_launcher_foreground.png'),
+      composeIcon(decoded, box, Math.round(size * 108 / 48), {
+        badgeRatio: ADAPTIVE_BADGE_RATIO,
+      }),
+    ));
+  });
+  const adaptiveDir = path.join(ANDROID_RES, 'mipmap-anydpi-v26');
+  fs.mkdirSync(adaptiveDir, { recursive: true });
+  const adaptiveXml = `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@android:color/white" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
+`;
+  ['ic_launcher.xml', 'ic_launcher_round.xml'].forEach(file => {
+    fs.writeFileSync(path.join(adaptiveDir, file), adaptiveXml);
   });
 
   written.forEach(line => console.log(`  ${line}`));

@@ -7,7 +7,7 @@
  *
  * It takes the two source PNGs and produces:
  *
- *   1. assets/bill/e2e_dairyfarm_logo.png + assets/bill/signature.png
+ *   1. assets/bill/e2e_dairyfarm_logo.png + assets/bill/seal.png
  *      Cropped, downscaled PNGs used by BillPreviewModal through plain
  *      `<Image source={require(...)} />`.
  *
@@ -27,7 +27,7 @@
  *
  * Usage:
  *   npm run build:bill-assets
- *   npm run build:bill-assets -- /path/to/logo.png /path/to/signature.png
+ *   npm run build:bill-assets -- /path/to/logo.png /path/to/seal.png
  */
 const fs = require('fs');
 const os = require('os');
@@ -38,7 +38,7 @@ const ROOT = path.join(__dirname, '..');
 const DOWNLOADS = path.join(os.homedir(), 'Downloads');
 const DEFAULT_SOURCES = {
   logo: path.join(DOWNLOADS, 'e2e_dairyfarm_logo_transparent.png'),
-  signature: path.join(DOWNLOADS, 'signature_blue.png'),
+  signature: path.join(ROOT, 'assets', 'bill', 'seal_dairy.png'),
 };
 
 // Rendered size in the PDF header (points) — only used to pick a sane
@@ -489,7 +489,7 @@ const main = () => {
     path.join(assetDir, 'e2e_dairyfarm_logo.png'),
     images.logo.png,
   );
-  fs.writeFileSync(path.join(assetDir, 'signature.png'), images.signature.png);
+  fs.writeFileSync(path.join(assetDir, 'seal.png'), images.signature.png);
 
   // 2. Generated JS module with the PDF payloads.
   const modulePath = path.join(ROOT, 'src', 'assets', 'billBrandImages.js');
@@ -511,7 +511,7 @@ const main = () => {
  * GENERATED FILE — do not edit by hand.
  * Rebuild with: npm run build:bill-assets
  *
- * The EiiE Dairyfarm logo and signature, pre-compressed for PDF embedding.
+ * The EiiE Dairyfarm logo and dairy seal, pre-compressed for PDF embedding.
  * Each \`data\` string is base64 of a zlib stream holding the 8-bit
  * DeviceRGB samples of the image after PNG row filtering — exactly what
  * the image XObject in src/utils/purePdfBuilder.js declares as
@@ -528,7 +528,7 @@ ${entry(
 )}
 ${entry(
   images.signature,
-  `Authorised signature, cropped to the ink (${images.signature.box.width}x${images.signature.box.height} of ${images.signature.sourceSize.width}x${images.signature.sourceSize.height})`,
+  `Dairy seal, cropped to visible artwork (${images.signature.box.width}x${images.signature.box.height} of ${images.signature.sourceSize.width}x${images.signature.sourceSize.height})`,
 )}
 };
 

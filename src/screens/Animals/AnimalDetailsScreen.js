@@ -21,7 +21,7 @@
  *   object so the edit form can pre-populate instantly.)
  */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
 import AppCard from '../../components/AppCard';
@@ -29,6 +29,7 @@ import DateRangeFilter from '../../components/DateRangeFilter';
 import SimpleBarChart from '../../components/SimpleBarChart';
 import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
+import TappablePhoto from '../../components/TappablePhoto';
 import colors from '../../constants/colors';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import { formatDateString } from '../../utils/date';
@@ -36,6 +37,7 @@ import { formatCurrency, formatLiters } from '../../utils/format';
 import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
 import { ANIMALS_ROUTES } from '../../navigation/routes';
 import {
+  getAnimalIcon,
   getAnimalTypeLabel,
   getGenderLabel,
   getStatusColor,
@@ -229,13 +231,12 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
         </View>
       ) : null}
 
-      <View style={styles.banner}>
-        {/* <Text style={styles.bannerIcon}>{getAnimalIcon(animal.type)}</Text> */}
-         <Image
-        style={{height:150,width:230}}
-         source={{
-      uri: "https://drive.google.com/uc?export=download&id=1OUejHErCoaQFUCoxcy4eCa-RQPDWozVV"
-    }}
+      <View style={styles.photoWrap}>
+        <TappablePhoto
+          imageUrl={animal.imageUrl}
+          label="Animal photo"
+          placeholder={getAnimalIcon(animal.type)}
+          style={styles.banner}
         />
       </View>
 
@@ -449,14 +450,23 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginLeft: spacing.xs,
   },
+  // The photo used to be a 160pt full-bleed strip with resizeMode
+  // "cover" — a 2.44:1 box against a ~4:3 photo, so `cover` cropped off
+  // roughly 45% of the image top and bottom and the animal's head and
+  // legs fell outside the frame. A 4:3 card (the aspect a phone camera
+  // actually produces) with "contain" shows the whole animal, and the
+  // side margins stop it bleeding under the status bar. Tap to zoom.
+  photoWrap: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+  },
   banner: {
-    height: 160,
+    width: '100%',
+    aspectRatio: 4 / 3,
     backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bannerIcon: {
-    fontSize: 72,
   },
   identityRow: {
     flexDirection: 'row',

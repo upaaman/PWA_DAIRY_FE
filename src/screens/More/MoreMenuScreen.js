@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: colors.green700,
+    backgroundColor: colors.green300,
     opacity: 0.5,
   },
   heroCircle2: {
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: colors.green600,
+    backgroundColor: '#FFE8AB',
     opacity: 0.35,
   },
   heroTitle: {
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: fontSize.xs,
     fontWeight: fontWeight.bold,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginLeft: spacing.sm,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md + 2,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.md,
   },
@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
   },
   rowIconWrap: {
-    width: 40,
-    height: 40,
+    width: 46,
+    height: 46,
     borderRadius: borderRadius.md,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   rowChevron: {
     fontSize: fontSize.md,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     marginTop: -1,
   },
 });

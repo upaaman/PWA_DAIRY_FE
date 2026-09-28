@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   labelDot: {
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   input: {
+    minHeight: 50,
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,

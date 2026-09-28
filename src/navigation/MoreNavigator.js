@@ -24,6 +24,7 @@ import AddEmployeeScreen from '../screens/Employees/AddEmployeeScreen';
 import AddSalaryScreen from '../screens/Employees/AddSalaryScreen';
 import AddSalaryTransactionScreen from '../screens/Employees/AddSalaryTransactionScreen';
 import ExpenseListScreen from '../screens/Expenses/ExpenseListScreen';
+import ViewExpenseDetailsScreen from '../screens/Expenses/ViewExpenseDetailsScreen';
 import AddExpenseScreen from '../screens/Expenses/AddExpenseScreen';
 import BreedingListScreen from '../screens/Breeding/BreedingListScreen';
 import AddBreedingScreen from '../screens/Breeding/AddBreedingScreen';
@@ -134,6 +135,11 @@ const MoreNavigator = () => (
       name={EXPENSE_ROUTES.LIST}
       component={ExpenseListScreen}
       options={{ title: 'Expenses' }}
+    />
+    <Stack.Screen
+      name={EXPENSE_ROUTES.DETAILS}
+      component={ViewExpenseDetailsScreen}
+      options={{ title: 'Expense Details' }}
     />
     <Stack.Screen
       name={EXPENSE_ROUTES.ADD}

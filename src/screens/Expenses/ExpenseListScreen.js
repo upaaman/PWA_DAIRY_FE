@@ -16,7 +16,12 @@ import AppCard from '../../components/AppCard';
 import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
-import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
+import {
+  borderRadius,
+  fontSize,
+  fontWeight,
+  spacing,
+} from '../../constants/appConstants';
 import { formatDateString } from '../../utils/date';
 import { formatCurrency } from '../../utils/format';
 import { EXPENSE_ROUTES } from '../../navigation/routes';
@@ -97,33 +102,42 @@ const ExpenseListScreen = ({ navigation }) => {
     const typeLabel = getExpenseTypeLabel(item.type);
     const accent = TYPE_ACCENTS[item.type] || colors.textSecondary;
     return (
-      <AppCard style={styles.listRow}>
-        <View style={[styles.typeBadge, { backgroundColor: `${accent}1A` }]}>
-          <Text style={[styles.typeBadgeText, { color: accent }]}>
-            {typeLabel}
-          </Text>
-        </View>
-
-        <View style={styles.rowInfo}>
-          <Text style={styles.rowDate}>
-            {formatDateString(item.expenseDate) || '—'}
-          </Text>
-          {item.animal ? (
-            <Text style={styles.rowMeta} numberOfLines={1}>
-              {item.animal.name || 'Animal'} #{item.animal.id}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`View ${typeLabel} expense details`}
+        onPress={() =>
+          navigation.navigate(EXPENSE_ROUTES.DETAILS, { expenseId: item.id })
+        }
+      >
+        <AppCard style={styles.listRow}>
+          <View style={[styles.typeBadge, { backgroundColor: `${accent}1A` }]}>
+            <Text style={[styles.typeBadgeText, { color: accent }]}>
+              {typeLabel}
             </Text>
-          ) : (
-            <Text style={styles.rowMeta}>General expense</Text>
-          )}
-          {item.notes ? (
-            <Text style={styles.rowNotes} numberOfLines={1}>
-              {item.notes}
-            </Text>
-          ) : null}
-        </View>
+          </View>
 
-        <Text style={styles.amount}>{formatCurrency(item.amount)}</Text>
-      </AppCard>
+          <View style={styles.rowInfo}>
+            <Text style={styles.rowDate}>
+              {formatDateString(item.expenseDate) || '—'}
+            </Text>
+            {item.animal ? (
+              <Text style={styles.rowMeta} numberOfLines={1}>
+                {item.animal.name || 'Animal'} #{item.animal.id}
+              </Text>
+            ) : (
+              <Text style={styles.rowMeta}>General expense</Text>
+            )}
+            {item.notes ? (
+              <Text style={styles.rowNotes} numberOfLines={1}>
+                {item.notes}
+              </Text>
+            ) : null}
+          </View>
+
+          <Text style={styles.amount}>{formatCurrency(item.amount)}</Text>
+          <Text style={styles.chevron}>›</Text>
+        </AppCard>
+      </Pressable>
     );
   };
 
@@ -231,6 +245,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.xs / 2,
     fontStyle: 'italic',
+  },
+  chevron: {
+    fontSize: 24,
+    color: colors.textSecondary,
+    marginLeft: spacing.sm,
   },
   amount: {
     fontSize: fontSize.md,

@@ -7,32 +7,28 @@
  *   { name, type, gender, breed, purchasePrice, status, dateOfBirth?, dateOfPurchase? }
  *
  * Required by the backend (validated client-side to match):
- *   name, type, gender, breed, status, purchasePrice (> 0)
+ *   name, type, gender, breed, status
  * Optional (backend allows null):
- *   dateOfBirth, dateOfPurchase
+ *   purchasePrice (positive when provided), dateOfBirth, dateOfPurchase
  *
- * Photo is NOT supported by the backend (Animal entity has no image
- * field) — it's kept as a visual-only placeholder and is never included
- * in the submitted payload.
+ * Optional photo uploads to POST /upload; its URL is saved as imageUrl.
  */
 import React, { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  View,
 } from 'react-native';
 import { post } from '../../api/decentralizedWrapper';
+import AnimalPhotoPicker from '../../components/AnimalPhotoPicker';
 import AppButton from '../../components/AppButton';
 import AppInput from '../../components/AppInput';
 import AppSelect from '../../components/AppSelect';
 import AppDatePicker from '../../components/AppDatePicker';
 import colors from '../../constants/colors';
-import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
+import { spacing } from '../../constants/appConstants';
 import { toISODateString } from '../../utils/date';
 import { GENDER_OPTIONS, STATUS_OPTIONS, TYPE_OPTIONS } from './animalMeta';
 
@@ -45,15 +41,14 @@ const initialForm = {
   status: null,
   dateOfBirth: null,
   dateOfPurchase: null,
+  imageUrl: null,
 };
 
 const AddAnimalScreen = ({ navigation }) => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  // Photo is UI-only for now — the backend doesn't support it yet, so this
-  // is intentionally kept out of `form`/the request payload.
-  const [photoPlaceholder, setPhotoPlaceholder] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
 
   const setField = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -80,7 +75,7 @@ const AddAnimalScreen = ({ navigation }) => {
     }
 
     const priceValue = Number(form.purchasePrice);
-    if (!form.purchasePrice.trim() || Number.isNaN(priceValue) || priceValue <= 0) {
+    if (form.purchasePrice.trim() && (!Number.isFinite(priceValue) || priceValue <= 0)) {
       nextErrors.purchasePrice = 'Please enter a valid purchase price.';
     }
 
@@ -89,17 +84,18 @@ const AddAnimalScreen = ({ navigation }) => {
   };
 
   const handleSave = async () => {
-    if (!validate()) {
+    if (photoBusy || submitting || !validate()) {
       return;
     }
 
     const payload = {
+      imageUrl: form.imageUrl,
       name: form.name.trim(),
       type: form.type,
       gender: form.gender,
       breed: form.breed.trim(),
       status: form.status,
-      purchasePrice: Number(form.purchasePrice),
+      purchasePrice: form.purchasePrice.trim() ? Number(form.purchasePrice) : null,
       dateOfBirth: toISODateString(form.dateOfBirth),
       dateOfPurchase: toISODateString(form.dateOfPurchase),
     };
@@ -131,19 +127,9 @@ const AddAnimalScreen = ({ navigation }) => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.photoSection}>
-          <Pressable
-            style={styles.photoCircle}
-            onPress={() =>
-              // Placeholder only — no backend field to store this yet.
-              setPhotoPlaceholder(prev => !prev)
-            }
-          >
-            <Text style={styles.photoIcon}>{photoPlaceholder ? '🐄' : '📷'}</Text>
-          </Pressable>
-          <Text style={styles.photoLabel}>Add Photo</Text>
-          <Text style={styles.photoNote}>(Not saved yet — coming soon)</Text>
-        </View>
+        <AnimalPhotoPicker imageUrl={form.imageUrl} type={form.type}
+          onChange={url => setField('imageUrl', url)} onBusyChange={setPhotoBusy}
+          disabled={submitting} />
 
         <AppInput
           label="Name *"
@@ -205,7 +191,7 @@ const AddAnimalScreen = ({ navigation }) => {
         />
 
         <AppInput
-          label="Purchase Price *"
+          label="Purchase Price (optional)"
           placeholder="E.g. 45000"
           value={form.purchasePrice}
           onChangeText={value => setField('purchasePrice', value)}
@@ -217,6 +203,7 @@ const AddAnimalScreen = ({ navigation }) => {
           title="Save"
           onPress={handleSave}
           loading={submitting}
+          disabled={photoBusy}
           style={styles.saveButton}
         />
       </ScrollView>
@@ -232,34 +219,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxxl,
-  },
-  photoSection: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  photoCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primaryLight,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoIcon: {
-    fontSize: 32,
-  },
-  photoLabel: {
-    marginTop: spacing.sm,
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
-    color: colors.text,
-  },
-  photoNote: {
-    marginTop: spacing.xs / 2,
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
   },
   saveButton: {
     marginTop: spacing.md,

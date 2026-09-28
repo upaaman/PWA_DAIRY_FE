@@ -4,14 +4,21 @@
  * Form to record a new expense. Submits to the real backend endpoint:
  *   POST /expense/create   (ExpenseController.createExpense)
  * using the exact request shape:
- *   { amount, notes, expenseDate, type, animalId? }
+ *   { amount, notes, expenseDate, type, animalId?, imageUrl? }
  *
  * `animalId` is optional — leave "Animal" as None and it is omitted from
  * the payload. The animal picker is populated from GET /animal/getAll.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import { get, post } from '../../api/decentralizedWrapper';
+import PhotoPicker from '../../components/PhotoPicker';
 import AppButton from '../../components/AppButton';
 import AppInput from '../../components/AppInput';
 import AppSelect from '../../components/AppSelect';
@@ -29,6 +36,7 @@ const initialForm = {
   expenseDate: new Date(),
   notes: '',
   animalId: null,
+  imageUrl: null,
 };
 
 const animalOptions = animals => [
@@ -47,6 +55,7 @@ const AddExpenseScreen = ({ navigation }) => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
 
   const loadAnimals = useCallback(async () => {
     try {
@@ -87,11 +96,12 @@ const AddExpenseScreen = ({ navigation }) => {
   };
 
   const handleSave = async () => {
-    if (!validate()) {
+    if (photoBusy || submitting || !validate()) {
       return;
     }
 
     const payload = {
+      imageUrl: form.imageUrl,
       amount: Number(form.amount),
       notes: form.notes.trim() || null,
       expenseDate: toISODateString(form.expenseDate),
@@ -140,6 +150,15 @@ const AddExpenseScreen = ({ navigation }) => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
+        <PhotoPicker
+          imageUrl={form.imageUrl}
+          placeholder="🧾"
+          label="Receipt Image"
+          onChange={url => setField('imageUrl', url)}
+          onBusyChange={setPhotoBusy}
+          disabled={submitting}
+        />
+
         <AppSelect
           label="Type *"
           placeholder="Select type"
@@ -187,6 +206,7 @@ const AddExpenseScreen = ({ navigation }) => {
           title="Save Expense"
           onPress={handleSave}
           loading={submitting}
+          disabled={photoBusy}
           style={styles.saveButton}
         />
       </ScrollView>

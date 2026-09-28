@@ -38,9 +38,12 @@ const MilkProductionSummaryCard = ({ totalLiters, percentChange, comparisonLabel
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDeep,
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing.xxl,
+    minHeight: 132,
+    borderBottomWidth: 5,
+    borderBottomColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -55,7 +58,8 @@ const styles = StyleSheet.create({
   },
   value: {
     color: colors.white,
-    fontSize: fontSize.xxxl,
+    fontSize: 36,
+    letterSpacing: -1,
     fontWeight: fontWeight.bold,
     marginTop: spacing.xs,
   },
@@ -70,16 +74,17 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.regular,
   },
   iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    width: 68,
+    height: 76,
+    borderRadius: 24,
+    transform: [{ rotate: '10deg' }],
+    backgroundColor: '#FFE8AB',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: spacing.md,
   },
   icon: {
-    fontSize: 26,
+    fontSize: 36,
   },
 });
 

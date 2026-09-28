@@ -4,15 +4,14 @@
  * Single row in the Animal List: avatar, "#id  Name", type/gender/status
  * line, a colored status dot, and a chevron to indicate it's tappable.
  *
- * The backend Animal entity has no image field, so we always show an
- * emoji avatar based on the animal type instead of a photo.
+ * Uses imageUrl from the backend, with an emoji fallback.
  */
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import AnimalPhoto from '../../components/AnimalPhoto';
 import colors from '../../constants/colors';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import {
-  getAnimalIcon,
   getAnimalTypeLabel,
   getGenderLabel,
   getStatusColor,
@@ -30,15 +29,7 @@ const AnimalListItem = ({ animal, onPress }) => {
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
     >
-      <View style={styles.avatar}>
-        {/* <Text style={styles.avatarIcon}>{getAnimalIcon(animal.type)}</Text> */}
-         <Image
-    style={{height:30,width:30}}
-    source={{
-      uri: "https://drive.google.com/uc?export=download&id=1OUejHErCoaQFUCoxcy4eCa-RQPDWozVV"
-    }}
-  />
-      </View>
+      <AnimalPhoto imageUrl={animal.imageUrl} type={animal.type} style={styles.avatar} />
 
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1}>

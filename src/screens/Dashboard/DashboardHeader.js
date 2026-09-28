@@ -13,7 +13,7 @@ import { fontSize, fontWeight } from '../../constants/appConstants';
 const DashboardHeader = () => {
   return (
     <View style={styles.container}>
-      <View>
+      <View style={styles.heading}>
         <Text style={styles.greeting}>Good Morning,</Text>
         <Text style={styles.title}>Mr Akash Ji</Text>
       </View>
@@ -31,20 +31,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  heading: {
+    flex: 1,
+    paddingRight: 12,
+  },
   greeting: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
   },
   title: {
-    fontSize: fontSize.xl,
+    fontSize: 28,
+    letterSpacing: -0.8,
+    marginTop: 4,
     fontWeight: fontWeight.bold,
     color: colors.text,
   },
   bellButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.white,
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    transform: [{ rotate: '8deg' }],
+    backgroundColor: '#FFE8AB',
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',

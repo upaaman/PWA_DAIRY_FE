@@ -89,6 +89,7 @@ export const EMPLOYEE_ROUTES = {
 // Expense stack (nested inside the More stack)
 export const EXPENSE_ROUTES = {
   LIST: 'ExpenseList',
+  DETAILS: 'ViewExpenseDetails',
   ADD: 'AddExpense',
 };
 

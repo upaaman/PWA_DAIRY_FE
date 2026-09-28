@@ -41,7 +41,11 @@ const BottomTabNavigator = () => (
     screenOptions={({ route }) => ({
       headerShown: false,
       tabBarActiveTintColor: colors.primary,
-      tabBarInactiveTintColor: colors.textMuted,
+      tabBarInactiveTintColor: colors.textSecondary,
+      tabBarStyle: styles.tabBar,
+      tabBarLabelStyle: styles.tabLabel,
+      tabBarItemStyle: styles.tabItem,
+      tabBarActiveBackgroundColor: colors.primaryLight,
       tabBarIcon: ({ color }) => (
         <TabIcon routeName={route.name} color={color} />
       ),
@@ -81,6 +85,22 @@ const BottomTabNavigator = () => (
 );
 
 const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 8,
+  },
+  tabItem: {
+    borderRadius: 16,
+    marginHorizontal: 2,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    marginBottom: 3,
+  },
   icon: {
     fontSize: 20,
   },

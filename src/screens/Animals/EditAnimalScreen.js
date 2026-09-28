@@ -24,6 +24,8 @@ import {
   View,
 } from 'react-native';
 import { get, patch } from '../../api/decentralizedWrapper';
+import AnimalPhotoPicker from '../../components/AnimalPhotoPicker';
+import AnimalPhoto from '../../components/AnimalPhoto';
 import AppButton from '../../components/AppButton';
 import AppInput from '../../components/AppInput';
 import AppSelect from '../../components/AppSelect';
@@ -32,7 +34,6 @@ import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
 import { fontSize, fontWeight, spacing } from '../../constants/appConstants';
-import { getAnimalIcon } from './animalMeta';
 import { STATUS_OPTIONS } from './animalMeta';
 
 const EditAnimalScreen = ({ navigation, route }) => {
@@ -43,6 +44,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
   const [loadingError, setLoadingError] = useState(null);
 
   const [form, setForm] = useState({
+    imageUrl: initialAnimal?.imageUrl || null,
     name: initialAnimal?.name || '',
     status: initialAnimal?.status || null,
     notes: initialAnimal?.notes || '',
@@ -50,6 +52,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
   });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
 
   // If the details screen didn't pass the animal object along, fetch it.
   const loadAnimal = useCallback(async () => {
@@ -62,6 +65,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
       const response = await get(`/animal/get/${animalId}`);
       setAnimal(response);
       setForm({
+        imageUrl: response.imageUrl || null,
         name: response.name || '',
         status: response.status || null,
         notes: response.notes || '',
@@ -100,7 +104,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
   };
 
   const handleSave = async () => {
-    if (!validate()) {
+    if (photoBusy || saving || !validate()) {
       return;
     }
 
@@ -108,6 +112,9 @@ const EditAnimalScreen = ({ navigation, route }) => {
     // values are never sent to the backend (e.g. editing just the status
     // sends only { status }).
     const delta = {};
+    if (form.imageUrl !== (animal?.imageUrl || null)) {
+      delta.imageUrl = form.imageUrl;
+    }
     const name = form.name.trim();
     if (name !== String(animal?.name || '').trim()) {
       delta.name = name;
@@ -173,9 +180,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
       >
         <AppCard style={styles.identityCard}>
           <View style={styles.identityRow}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarIcon}>{getAnimalIcon(animal.type)}</Text>
-            </View>
+            <AnimalPhoto imageUrl={form.imageUrl} type={animal.type} style={styles.avatarCircle} />
             <View style={styles.identityText}>
               <Text style={styles.identityName}>{animal.name}</Text>
               <Text style={styles.identityMeta}>
@@ -184,6 +189,10 @@ const EditAnimalScreen = ({ navigation, route }) => {
             </View>
           </View>
         </AppCard>
+
+        <AnimalPhotoPicker imageUrl={form.imageUrl} type={animal.type}
+          onChange={url => setField('imageUrl', url)} onBusyChange={setPhotoBusy}
+          disabled={saving} />
 
         <AppCard style={styles.activeCard}>
           <View style={styles.activeRow}>
@@ -239,6 +248,7 @@ const EditAnimalScreen = ({ navigation, route }) => {
           title="Save Changes"
           onPress={handleSave}
           loading={saving}
+          disabled={photoBusy}
           style={styles.saveButton}
         />
       </ScrollView>

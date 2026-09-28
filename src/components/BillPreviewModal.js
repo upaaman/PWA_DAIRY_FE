@@ -35,7 +35,7 @@ import { sortBillTransactions } from '../utils/billTransactions';
 // scripts/buildBillBrandAssets.js), which crops the originals to their
 // content and sizes them for print.
 const BRAND_LOGO = require('../../assets/bill/e2e_dairyfarm_logo.png');
-const BRAND_SIGNATURE = require('../../assets/bill/signature.png');
+const BRAND_SIGNATURE = require('../../assets/bill/seal.png');
 
 const BillPreviewModal = ({
   visible,

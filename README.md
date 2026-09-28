@@ -140,3 +140,20 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+### Animal photos
+
+Add/Edit Animal now lets you choose a photo from the device library. The app
+uploads it as multipart `file` to `POST /upload`, reads `{ "url": "..." }`, and
+saves that value as `imageUrl` in animal create/update requests. Photo-only edits
+send only `imageUrl`; unrelated edits preserve the existing photo. Animal list
+and detail views show the returned image, with an animal icon if missing or broken.
+
+Uploads support JPG/PNG/WEBP up to 3 MB. Save stays disabled while a photo is
+being selected or uploaded; cancelling or failing a replacement retains the old
+photo. Uploaded photos are attached to the animal only when Save is pressed.
+
+The native `react-native-image-picker` dependency requires rebuilding the app
+(`npm run android`, or install iOS pods then rebuild with Xcode). Fast Refresh
+alone cannot load the native photo picker. iOS includes the photo-library usage
+message in Info.plist.

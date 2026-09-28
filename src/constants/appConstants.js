@@ -18,11 +18,11 @@ export const spacing = {
 };
 
 export const borderRadius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
+  sm: 10,
+  md: 16,
+  lg: 22,
+  xl: 26,
+  xxl: 30,
   full: 999, // fully rounded, e.g. pill buttons / avatars
 };
 
@@ -48,20 +48,20 @@ export const shadows = {
   card: {
     ...Platform.select({
       ios: {
-        shadowColor: '#173B28',
+        shadowColor: '#123D2B',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.08,
+        shadowOpacity: 0.06,
         shadowRadius: 16,
       },
       android: {
-        elevation: 3,
+        elevation: 2,
       },
     }),
   },
   floating: {
     ...Platform.select({
       ios: {
-        shadowColor: '#113D24',
+        shadowColor: '#123D2B',
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.12,
         shadowRadius: 20,
@@ -74,7 +74,7 @@ export const shadows = {
   subtle: {
     ...Platform.select({
       ios: {
-        shadowColor: '#113D24',
+        shadowColor: '#123D2B',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.06,
         shadowRadius: 8,

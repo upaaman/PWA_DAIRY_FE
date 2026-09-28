@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   },
   primary: {
     backgroundColor: colors.primary,
+    ...shadows.subtle,
   },
   secondary: {
     backgroundColor: colors.primaryLight,
@@ -115,7 +116,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    fontWeight: fontWeight.semibold,
+    fontWeight: fontWeight.bold,
+    letterSpacing: 0.2,
   },
   smallText: {
     fontSize: fontSize.xs,

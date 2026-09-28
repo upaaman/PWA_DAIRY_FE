@@ -42,7 +42,7 @@ const initialForm = {
   productionDate: new Date(),
 };
 
-const AddMilkProductionScreen = ({ navigation }) => {
+const AddMilkProductionScreen = () => {
   const [animals, setAnimals] = useState([]);
   const [animalsLoading, setAnimalsLoading] = useState(true);
   const [animalsError, setAnimalsError] = useState(null);
@@ -125,8 +125,12 @@ const AddMilkProductionScreen = ({ navigation }) => {
     try {
       setSubmitting(true);
       await post('/milkProduction/create', payload);
+      // Stay ready for the next animal, keeping the selected date and shift.
+      setForm(prev => ({ ...prev, animalId: null, quantity: '' }));
+      setErrors({});
+      await loadAnimals();
       Alert.alert('Success', 'Milk production recorded successfully.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+        { text: 'OK' },
       ]);
     } catch (err) {
       Alert.alert(

@@ -17,9 +17,11 @@ const DashboardStatCard = ({ emoji, label, value, changePercent, backgroundColor
   const isPositive = hasChange && changePercent >= 0;
 
   return (
-    <View style={[styles.card, { backgroundColor }]}>
+    <View style={[styles.card, { borderColor: backgroundColor }]}>
       <View style={styles.topRow}>
-        <Text style={styles.emoji}>{emoji}</Text>
+        <View style={[styles.emojiWrap, { backgroundColor }]}>
+          <Text style={styles.emoji}>{emoji}</Text>
+        </View>
         {hasChange ? (
           <View style={styles.changePill}>
             <Text style={styles.changeText}>
@@ -37,8 +39,11 @@ const DashboardStatCard = ({ emoji, label, value, changePercent, backgroundColor
 const styles = StyleSheet.create({
   card: {
     width: '48%',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderBottomWidth: 4,
     borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    padding: spacing.md,
     marginBottom: spacing.md,
   },
   topRow: {
@@ -46,11 +51,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  emojiWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emoji: {
-    fontSize: 24,
+    fontSize: 22,
   },
   changePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: colors.background,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.xs + 2,
     paddingVertical: spacing.xs / 2,
@@ -58,17 +70,18 @@ const styles = StyleSheet.create({
   changeText: {
     fontSize: fontSize.xs,
     fontWeight: fontWeight.bold,
-    color: colors.white,
+    color: colors.text,
   },
   value: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
-    color: colors.white,
-    marginTop: spacing.sm,
+    color: colors.text,
+    marginTop: spacing.md,
   },
   label: {
     fontSize: fontSize.xs,
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: colors.textSecondary,
+    lineHeight: 18,
     marginTop: spacing.xs / 2,
   },
 });

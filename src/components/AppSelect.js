@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
+    fontWeight: fontWeight.semibold,
     color: colors.text,
   },
   labelDot: {
@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   field: {
+    minHeight: 50,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

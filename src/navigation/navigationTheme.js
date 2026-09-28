@@ -11,16 +11,18 @@ import colors from '../constants/colors';
 // Navigator's `screenOptions`.
 export const stackScreenOptions = {
   headerStyle: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
     shadowColor: colors.green300,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.35,
     shadowRadius: 3,
     elevation: 3,
   },
+  headerShadowVisible: false,
   headerTintColor: colors.primaryDark,
   headerTitleStyle: {
-    fontWeight: '700',
+    fontWeight: '800',
+    fontSize: 22,
     color: colors.primaryDark,
   },
   headerTitleAlign: 'left',

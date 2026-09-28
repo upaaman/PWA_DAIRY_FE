@@ -19,7 +19,7 @@ const request = async (endpoint, options = {}) => {
     response = await fetch(url, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...options.headers,
       },
     });
@@ -56,6 +56,10 @@ export const post = (endpoint, body, options = {}) =>
     body: JSON.stringify(body),
   });
 
+// Let fetch set the multipart boundary; never JSON-stringify file uploads.
+export const postMultipart = (endpoint, body, options = {}) =>
+  request(endpoint, { ...options, method: 'POST', body });
+
 export const put = (endpoint, body, options = {}) =>
   request(endpoint, {
     ...options,
@@ -73,4 +77,4 @@ export const patch = (endpoint, body, options = {}) =>
 export const del = (endpoint, options = {}) =>
   request(endpoint, { ...options, method: 'DELETE' });
 
-export default { get, post, put, patch, del };
+export default { get, post, postMultipart, put, patch, del };

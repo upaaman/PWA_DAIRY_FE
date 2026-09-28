@@ -7,54 +7,54 @@
  */
 
 const colors = {
-  // Brand greens — the app's theme is green
-  primary: '#1F6D3E', // main brand green (buttons, headers, active states)
-  primaryDark: '#164F2D', // pressed/hover state for primary
-  primaryDeep: '#0F3D22', // darkest green - gradients, hero sections
-  primaryLight: '#E7F5EC', // very light green - badges, selected chips, subtle backgrounds
-  primarySoft: '#F2FAF5', // faintest green wash - screen/scaffold tints
-  secondary: '#4CAF50', // lighter green - secondary accents, success highlights
+  // Fresh forest and mint brand palette
+  primary: '#23734D', // main brand color (buttons, headers, active states)
+  primaryDark: '#19583A', // pressed/hover state for primary
+  primaryDeep: '#123D2B', // darkest green - gradients, hero sections
+  primaryLight: '#E2F3D9', // very light green - badges, selected chips, subtle backgrounds
+  primarySoft: '#F3FAEF', // faintest green wash - screen/scaffold tints
+  secondary: '#6CA457', // lighter green - secondary accents, success highlights
 
   // Green scale (Tailwind-inspired) for flexible accent work
-  green50: '#F2FAF5',
-  green100: '#E0F3E7',
-  green200: '#C4E8D3',
-  green300: '#93D6AE',
-  green400: '#5CBC80',
-  green500: '#37A25F',
-  green600: '#268949',
-  green700: '#1F6D3E',
-  green800: '#17502F',
-  green900: '#113D24',
+  green50: '#F3FAEF',
+  green100: '#E2F3D9',
+  green200: '#CCE7BB',
+  green300: '#ACD398',
+  green400: '#86BA70',
+  green500: '#62A054',
+  green600: '#3E884D',
+  green700: '#23734D',
+  green800: '#19583A',
+  green900: '#123D2B',
 
   // Feedback
-  success: '#16A34A',
-  warning: '#F59E0B',
-  danger: '#DC2626',
-  info: '#3B82F6',
+  success: '#24764D',
+  warning: '#A96109',
+  danger: '#C53F51',
+  info: '#3569B0',
 
   // Extra accents — used for colorful dashboard-style stat cards where
   // each metric benefits from its own distinct color.
-  accentPurple: '#8B5CF6',
-  accentTeal: '#0D9488',
+  accentPurple: '#6E8243',
+  accentTeal: '#207D79',
 
   // Surfaces & neutrals
-  background: '#F5F9F6', // app background (light, slightly green-tinted)
+  background: '#F5F8EF', // soft botanical background
   surface: '#FFFFFF', // cards, inputs
   white: '#FFFFFF',
-  border: '#E2EDE6', // subtle card/input borders
-  borderStrong: '#C9DFD2', // hover/filled borders
-  overlay: 'rgba(15, 61, 34, 0.4)', // modal scrim (green-tinted)
+  border: '#DFE8D8', // subtle card/input borders
+  borderStrong: '#BDD1B2', // hover/filled borders
+  overlay: 'rgba(18, 61, 43, 0.4)', // modal scrim (green-tinted)
 
   // Text
-  text: '#101B14', // primary text (near-black, green-tinted)
-  textSecondary: '#5B6E63', // secondary/supporting text
-  textMuted: '#9DB0A5', // placeholders, disabled text
+  text: '#203729', // primary text (near-black, green-tinted)
+  textSecondary: '#596D5C', // secondary/supporting text
+  textMuted: '#6F806F', // placeholders, disabled text
   textOnPrimary: '#FFFFFF', // text placed on top of primary green
 
   // Shadow (used with elevation/shadow style helpers)
-  shadow: 'rgba(15, 61, 34, 0.10)',
-  shadowSubtle: 'rgba(15, 61, 34, 0.06)',
+  shadow: 'rgba(18, 61, 43, 0.10)',
+  shadowSubtle: 'rgba(18, 61, 43, 0.06)',
 };
 
 export default colors;
