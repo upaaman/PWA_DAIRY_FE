@@ -157,3 +157,22 @@ The native `react-native-image-picker` dependency requires rebuilding the app
 (`npm run android`, or install iOS pods then rebuild with Xcode). Fast Refresh
 alone cannot load the native photo picker. iOS includes the photo-library usage
 message in Info.plist.
+
+### Welcome greeting
+
+Opening the app plays `assets/audio/welcome_hi.wav`, about 0.8 s after the app
+comes to the foreground. It is native rather than JavaScript, so it needs a
+rebuild (Fast Refresh will not pick it up):
+
+- `android/app/src/main/java/com/fedairy/MainActivity.kt` — `MediaPlayer` with
+  `R.raw.welcome_hi`, started from `onResume`
+- `ios/FeDairy/AppDelegate.swift` — `AVAudioPlayer`, started from
+  `applicationDidBecomeActive` with the `.ambient` audio category so it obeys
+  the silent switch and mixes with whatever else is playing
+
+It plays on **every** opening, including returning to the app from the
+background, because both hooks fire on every foreground transition. Nothing is
+persisted, so there is no daily throttle to remove — the only guard left is not
+restarting the clip while it is already playing. To restrict it to a cold
+launch, add an in-memory `hasPlayedThisLaunch` flag in each file and include it
+in the guard next to `welcomePlayer == null`.

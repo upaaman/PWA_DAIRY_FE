@@ -23,7 +23,6 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
-import AppButton from '../../components/AppButton';
 import EmptyState from '../../components/EmptyState';
 import FilterChip from '../../components/FilterChip';
 import Loading from '../../components/Loading';
@@ -32,7 +31,6 @@ import {
   borderRadius,
   fontSize,
   fontWeight,
-  shadows,
   spacing,
 } from '../../constants/appConstants';
 import { BREEDING_STATUS_OPTIONS } from '../../constants/breedingEnums';
@@ -273,22 +271,10 @@ const BreedingListScreen = ({ navigation }) => {
               icon="🤰"
               title="No breeding records yet"
               message="Record the first breeding for one of your animals."
-              actionLabel="Add Breeding"
-              onActionPress={openAdd}
             />
           )
         }
       />
-
-      {filteredBreedings.length > 0 ? (
-        <View style={styles.fabWrap}>
-          <AppButton
-            title="Add Breeding"
-            onPress={openAdd}
-            style={styles.fab}
-          />
-        </View>
-      ) : null}
     </View>
   );
 };
@@ -300,7 +286,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxxl * 2,
+    paddingBottom: spacing.xxxl,
     flexGrow: 1,
   },
 
@@ -443,18 +429,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     overflow: 'hidden',
-  },
-
-  /* Floating add button */
-  fabWrap: {
-    position: 'absolute',
-    right: spacing.lg,
-    bottom: spacing.lg,
-  },
-  fab: {
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.xl,
-    ...shadows.floating,
   },
 
   headerButton: {

@@ -9,7 +9,7 @@
  * Icons use plain emoji for now to avoid adding an icon library dependency.
  */
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/Dashboard';
 import AnimalsNavigator from './AnimalsNavigator';
@@ -32,8 +32,10 @@ const TAB_ICONS = {
 };
 
 // Defined outside the navigator so it isn't re-created on every render.
-const TabIcon = ({ routeName, color }) => (
-  <Text style={[styles.icon, { color }]}>{TAB_ICONS[routeName]}</Text>
+const TabIcon = ({ routeName, color, focused }) => (
+  <View style={[styles.iconPill, focused && styles.iconPillActive]}>
+    <Text style={[styles.icon, { color }]}>{TAB_ICONS[routeName]}</Text>
+  </View>
 );
 
 const BottomTabNavigator = () => (
@@ -45,9 +47,10 @@ const BottomTabNavigator = () => (
       tabBarStyle: styles.tabBar,
       tabBarLabelStyle: styles.tabLabel,
       tabBarItemStyle: styles.tabItem,
-      tabBarActiveBackgroundColor: colors.primaryLight,
-      tabBarIcon: ({ color }) => (
-        <TabIcon routeName={route.name} color={color} />
+      tabBarActiveBackgroundColor: 'transparent',
+      tabBarIconStyle: styles.iconSlot,
+      tabBarIcon: ({ color, focused }) => (
+        <TabIcon routeName={route.name} color={color} focused={focused} />
       ),
     })}
   >
@@ -88,8 +91,9 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.surface,
     borderTopColor: colors.border,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    // Flush edges avoid exposing the dark window behind rounded corners.
+    elevation: 0,
+    shadowOpacity: 0,
     paddingTop: 8,
   },
   tabItem: {
@@ -100,6 +104,23 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     marginBottom: 3,
+  },
+  iconSlot: {
+    width: 44,
+    height: 30,
+  },
+  iconPill: {
+    width: 44,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  iconPillActive: {
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.green200,
   },
   icon: {
     fontSize: 20,

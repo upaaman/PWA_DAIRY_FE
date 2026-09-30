@@ -3,9 +3,6 @@ package com.fedairy
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -15,22 +12,28 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 class MainActivity : ReactActivity() {
   private val welcomeHandler = Handler(Looper.getMainLooper())
   private var welcomePlayer: MediaPlayer? = null
+
   private val welcomePreferences by lazy { getSharedPreferences("welcome", MODE_PRIVATE) }
+  private fun canPlayWelcome(): Boolean {
+    val lastPlayed = welcomePreferences.getLong("lastPlayedAt", 0L)
+    return lastPlayed == 0L || System.currentTimeMillis() - lastPlayed >= 60 * 60 * 1000L
+  }
+
   private val playWelcome = Runnable {
-    val playbackDay = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(Date())
-    if (welcomePreferences.getString("lastPlayedDay", null) != playbackDay && welcomePlayer == null) {
+    if (welcomePlayer == null && canPlayWelcome()) {
       try {
         val player = MediaPlayer.create(this, R.raw.welcome_hi)
         welcomePlayer = player
-        player?.setOnCompletionListener {
-          welcomePreferences.edit().putString("lastPlayedDay", playbackDay).apply()
-          stopWelcome()
-        }
+        player?.setOnCompletionListener { stopWelcome() }
         player?.setOnErrorListener { _, _, _ ->
           stopWelcome()
           true
         }
-        player?.start()
+        if (player != null) {
+          player.start()
+          // Persist at playback start so interruptions and restarts cannot repeat it.
+          welcomePreferences.edit().putLong("lastPlayedAt", System.currentTimeMillis()).apply()
+        }
       } catch (_: Exception) {
         // Audio must never prevent the app from opening. Retry next launch.
         stopWelcome()
@@ -40,7 +43,8 @@ class MainActivity : ReactActivity() {
 
   override fun onResume() {
     super.onResume()
-    welcomeHandler.postDelayed(playWelcome, 800)
+    welcomeHandler.removeCallbacks(playWelcome)
+    if (canPlayWelcome()) { welcomeHandler.postDelayed(playWelcome, 800) }
   }
 
   override fun onPause() {

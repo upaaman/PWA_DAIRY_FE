@@ -59,6 +59,8 @@ const ViewExpenseDetailsScreen = ({ route }) => {
       return () => {
         active = false;
       };
+    // Changing the retry counter intentionally re-runs the focused request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expenseId, reloadKey]),
   );
 

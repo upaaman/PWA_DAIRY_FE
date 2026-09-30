@@ -22,7 +22,6 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
-import AppButton from '../../components/AppButton';
 import EmptyState from '../../components/EmptyState';
 import Loading from '../../components/Loading';
 import colors from '../../constants/colors';
@@ -30,7 +29,6 @@ import {
   borderRadius,
   fontSize,
   fontWeight,
-  shadows,
   spacing,
 } from '../../constants/appConstants';
 import { toISODateString } from '../../utils/date';
@@ -231,23 +229,10 @@ const VaccineListScreen = ({ navigation }) => {
               icon="💉"
               title="No vaccinations yet"
               message="Record the first vaccine given to one of your animals."
-              actionLabel="Add Vaccine"
-              onActionPress={openAdd}
             />
           )
         }
       />
-
-      {filteredVaccines.length > 0 ? (
-        <View style={styles.fabWrap}>
-          <AppButton
-            title="Add Vaccine"
-            onPress={openAdd}
-            size="medium"
-            style={styles.fab}
-          />
-        </View>
-      ) : null}
     </View>
   );
 };
@@ -259,7 +244,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxxl * 2,
+    paddingBottom: spacing.xxxl,
     flexGrow: 1,
   },
 
@@ -393,18 +378,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     overflow: 'hidden',
-  },
-
-  /* Floating add button */
-  fabWrap: {
-    position: 'absolute',
-    right: spacing.lg,
-    bottom: spacing.lg,
-  },
-  fab: {
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.xl,
-    ...shadows.floating,
   },
 
   headerButton: {

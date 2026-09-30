@@ -12,6 +12,7 @@ import DateRangeFilter from '../../components/DateRangeFilter';
 import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import colors from '../../constants/colors';
+import DraggableAddButton from '../../components/DraggableAddButton';
 import { fontSize, spacing } from '../../constants/appConstants';
 import { RANGE_KEYS, getDateRangeForKey } from '../../utils/dateRanges';
 import { PURCHASE_ROUTES } from '../../navigation/routes';
@@ -91,6 +92,12 @@ const PurchaseListScreen = ({ navigation }) => {
           />
         }
       />
+      <DraggableAddButton
+        compact
+        onPress={openAdd}
+        label="Add Purchase"
+        storageKey="purchase.addButton.position.v1"
+      />
     </View>
   );
 };
@@ -107,7 +114,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: 100,
     flexGrow: 1,
   },
   headerButton: {

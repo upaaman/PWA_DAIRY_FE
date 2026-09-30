@@ -24,6 +24,7 @@ const ProductionListSection = ({
   emptyMessage = 'No production records found for the selected filters.',
   onPressItem,
   ListHeaderComponent,
+  contentContainerStyle,
 }) => {
   if (loading) {
     return <Loading message="Loading production records..." />;
@@ -69,7 +70,7 @@ const ProductionListSection = ({
       ListEmptyComponent={
         <EmptyState title="No records found" message={emptyMessage} />
       }
-      contentContainerStyle={styles.listContent}
+      contentContainerStyle={[styles.listContent, contentContainerStyle]}
       stickySectionHeadersEnabled={false}
     />
   );

@@ -8,13 +8,12 @@ import ReactAppDependencyProvider
 class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioPlayerDelegate {
   private var welcomePlayer: AVAudioPlayer?
   private var welcomeWork: DispatchWorkItem?
-  private let welcomeKey = "welcome.lastPlayedDate"
-  private var welcomeStartedAt: Date?
-
-  private var hasPlayedToday: Bool {
-    guard let lastPlayed = UserDefaults.standard.object(forKey: welcomeKey) as? Date else { return false }
-    return Calendar.current.isDate(lastPlayed, inSameDayAs: Date())
+  private let welcomeKey = "welcome.lastPlayedAt"
+  private var canPlayWelcome: Bool {
+    guard let lastPlayed = UserDefaults.standard.object(forKey: welcomeKey) as? Date else { return true }
+    return Date().timeIntervalSince(lastPlayed) >= 60 * 60
   }
+
   var window: UIWindow?
 
   var reactNativeDelegate: ReactNativeDelegate?
@@ -42,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioPlayerDelegate {
     return true
   }
   func applicationDidBecomeActive(_ application: UIApplication) {
-    guard !hasPlayedToday, welcomePlayer == nil else { return }
+    guard welcomePlayer == nil, canPlayWelcome else { return }
     welcomeWork?.cancel()
     let work = DispatchWorkItem { [weak self] in self?.playWelcome() }
     welcomeWork = work
@@ -50,8 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioPlayerDelegate {
   }
 
   private func playWelcome() {
-    guard UIApplication.shared.applicationState == .active,
-          !hasPlayedToday,
+    guard UIApplication.shared.applicationState == .active, canPlayWelcome,
           let url = Bundle.main.url(forResource: "welcome_hi", withExtension: "wav") else { return }
     do {
       // Respect silent mode and mix with any audio the user already has playing.
@@ -59,8 +57,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioPlayerDelegate {
       try AVAudioSession.sharedInstance().setActive(true)
       welcomePlayer = try AVAudioPlayer(contentsOf: url)
       welcomePlayer?.delegate = self
-      welcomeStartedAt = Date()
-      if welcomePlayer?.play() != true { stopWelcome() }
+      if welcomePlayer?.play() == true {
+        UserDefaults.standard.set(Date(), forKey: welcomeKey)
+      } else {
+        stopWelcome()
+      }
     } catch {
       stopWelcome()
     }
@@ -73,9 +74,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioPlayerDelegate {
   }
 
   func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-    if flag, let startedAt = welcomeStartedAt {
-      UserDefaults.standard.set(startedAt, forKey: welcomeKey)
-    }
     stopWelcome()
   }
 
@@ -86,7 +84,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioPlayerDelegate {
   private func stopWelcome() {
     welcomePlayer?.stop()
     welcomePlayer = nil
-    welcomeStartedAt = nil
     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
   }
 }

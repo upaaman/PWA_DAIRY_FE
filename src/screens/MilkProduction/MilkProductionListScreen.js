@@ -16,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import AppSelect from '../../components/AppSelect';
 import QuickRangeChips from '../../components/QuickRangeChips';
 import colors from '../../constants/colors';
+import DraggableAddButton from '../../components/DraggableAddButton';
 import { fontSize, spacing } from '../../constants/appConstants';
 import { RANGE_KEYS, getDateRangeForKey } from '../../utils/dateRanges';
 import { PRODUCTION_ROUTES } from '../../navigation/routes';
@@ -117,6 +118,7 @@ const MilkProductionListScreen = ({ navigation, route }) => {
       </View>
 
       <ProductionListSection
+        contentContainerStyle={styles.listContent}
         grouped={grouped}
         loading={loading}
         error={error}
@@ -126,6 +128,12 @@ const MilkProductionListScreen = ({ navigation, route }) => {
         }
         emptyMessage="Try a different date range or filter, or add a new production entry."
       />
+      <DraggableAddButton
+        compact
+        onPress={openAdd}
+        label="Add Production"
+        storageKey="production.addButton.position.v1"
+      />
     </View>
   );
 };
@@ -134,6 +142,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  listContent: {
+    paddingBottom: 100,
   },
   chipsRow: {
     marginTop: spacing.md,
