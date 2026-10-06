@@ -43,7 +43,7 @@ import {
   getStatusColor,
   getStatusLabel,
 } from './animalMeta';
-import { bucketByDay, computeShiftBreakdown } from './animalProductionMeta';
+import { computeShiftBreakdown } from './animalProductionMeta';
 import DetailRow from './DetailRow';
 import ExpenseRecordRow from './ExpenseRecordRow';
 import ProductionRecordRow from './ProductionRecordRow';

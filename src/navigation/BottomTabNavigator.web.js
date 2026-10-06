@@ -1,0 +1,159 @@
+/**
+ * BottomTabNavigator
+ *
+ * Main bottom tab bar: Home, Animals, Production, Purchase, Sales, More.
+ * Each tab (except Home) renders its own stack navigator so it can
+ * push sub-screens (e.g. Animals -> Add Animal) without extra nesting
+ * at the root level.
+ *
+ * Icons use plain emoji for now to avoid adding an icon library dependency.
+ */
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Link } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import DashboardScreen from '../screens/Dashboard';
+import AnimalsNavigator from './AnimalsNavigator';
+import ProductionNavigator from './ProductionNavigator';
+import PurchaseNavigator from './PurchaseNavigator';
+import SalesNavigator from './SalesNavigator';
+import MoreNavigator from './MoreNavigator';
+import colors from '../constants/colors';
+import { TABS } from './routes';
+
+const Tab = createBottomTabNavigator();
+
+const TAB_ICONS = {
+  [TABS.HOME]: '🏠',
+  [TABS.ANIMALS]: '🐄',
+  [TABS.PRODUCTION]: '🥛',
+  [TABS.PURCHASE]: '🚚',
+  [TABS.SALES]: '💰',
+  [TABS.MORE]: '⋯',
+};
+
+// Defined outside the navigator so it isn't re-created on every render.
+const TabIcon = ({ routeName, color, focused }) => (
+  <View style={[styles.iconPill, focused && styles.iconPillActive]}>
+    <Text style={[styles.icon, { color }]}>{TAB_ICONS[routeName]}</Text>
+  </View>
+);
+
+const NotFound = () => (
+  <View style={{ flex: 1, padding: 32, justifyContent: 'center' }}>
+    <Text
+      style={{ fontSize: 24, color: colors.primaryDeep, fontWeight: '700' }}
+    >
+      Page not found
+    </Text>
+    <Text style={{ marginVertical: 16 }}>
+      This link does not match a FeDairy page.
+    </Text>
+    <Link screen={TABS.HOME} style={{ color: colors.primary }}>
+      Go to Home
+    </Link>
+  </View>
+);
+
+const BottomTabNavigator = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      headerShown: false,
+      tabBarActiveTintColor: colors.primary,
+      tabBarInactiveTintColor: colors.textSecondary,
+      tabBarStyle: styles.tabBar,
+      tabBarLabelStyle: styles.tabLabel,
+      tabBarItemStyle: styles.tabItem,
+      tabBarActiveBackgroundColor: 'transparent',
+      tabBarIconStyle: styles.iconSlot,
+      tabBarIcon: ({ color, focused }) => (
+        <TabIcon routeName={route.name} color={color} focused={focused} />
+      ),
+    })}
+  >
+    <Tab.Screen
+      name={TABS.HOME}
+      component={DashboardScreen}
+      options={{ title: 'Home' }}
+    />
+    <Tab.Screen
+      name={TABS.ANIMALS}
+      component={AnimalsNavigator}
+      options={{ title: 'Animals' }}
+    />
+    <Tab.Screen
+      name={TABS.PRODUCTION}
+      component={ProductionNavigator}
+      options={{ title: 'Production' }}
+    />
+    <Tab.Screen
+      name={TABS.PURCHASE}
+      component={PurchaseNavigator}
+      options={{ title: 'Purchase' }}
+    />
+    <Tab.Screen
+      name={TABS.SALES}
+      component={SalesNavigator}
+      options={{ title: 'Sales' }}
+    />
+    <Tab.Screen
+      name={TABS.MORE}
+      component={MoreNavigator}
+      options={{ title: 'More' }}
+    />
+    <Tab.Screen
+      name="WebNotFound"
+      component={NotFound}
+      options={{
+        title: 'Page not found',
+        tabBarItemStyle: { display: 'none' },
+      }}
+    />
+  </Tab.Navigator>
+);
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
+    // Flush edges avoid exposing the dark window behind rounded corners.
+    elevation: 0,
+    shadowOpacity: 0,
+    paddingTop: 8,
+    height: 72,
+    paddingBottom: 8,
+  },
+  tabItem: {
+    borderRadius: 16,
+    marginHorizontal: 2,
+  },
+  tabLabel: {
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
+    fontSize: 9,
+    fontWeight: '700',
+    marginBottom: 3,
+  },
+  iconSlot: {
+    width: 44,
+    height: 30,
+  },
+  iconPill: {
+    width: 44,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  iconPillActive: {
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.green200,
+  },
+  icon: {
+    fontSize: 20,
+  },
+});
+
+export default BottomTabNavigator;
