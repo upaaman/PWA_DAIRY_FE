@@ -176,3 +176,7 @@ persisted, so there is no daily throttle to remove — the only guard left is no
 restarting the clip while it is already playing. To restrict it to a cold
 launch, add an in-memory `hasPlayedThisLaunch` flag in each file and include it
 in the guard next to `welcomePlayer == null`.
+
+## Browser / PWA foundation
+
+Run `npm run web:dev` and open http://127.0.0.1:5173. See [web/README.md](web/README.md) for API configuration and browser build instructions, and [PWA_PLAN.md](PWA_PLAN.md) for migration progress. Native Android commands remain unchanged.
