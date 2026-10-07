@@ -34,17 +34,23 @@ Production hosting must serve `index.html` for application routes such as `/prod
 
 ## Foundation scope
 
-Available now: browser app entry, all six tabs, mapped URLs, not-found page, native-stack web navigation, green responsive shell, browser dates and real dialogs, existing shared screen rendering, local API configuration/proxy.
+Available now: browser app entry, all six tabs, mapped URLs, not-found page, native-stack web navigation, green responsive shell, browser dates and real dialogs, shared dashboard and animal flows, local API configuration/proxy, and browser animal-photo upload.
 
-Deliberate later work:
+Current boundaries and remaining work:
 
-- `PhotoPicker.web.js` displays existing photos and explicitly explains that web uploads are not available yet (milestone 3).
-- `pdfService.web.js` reports export as unavailable and returns success:false; it never pretends a file was saved (milestone 6).
+- `PhotoPicker.web.js` accepts JPG/PNG/WEBP, resizes to the existing limits, and uploads a browser `File` to the existing `/upload` endpoint. The native chooser is controlled by iOS; FeDairy cannot force Camera versus Photo Library. HEIC input is rejected with a JPEG-sharing suggestion.
+- `pdfService.web.js` generates the same seller/customer PDF with the existing dairy seal. Desktop browsers download it; Safari opens the PDF viewer for Share > Save to Files/Print. If Safari blocks a new tab after a share error, an explicit Open PDF action retries it. File sharing uses the Web Share API only when `canShare({ files })` allows it.
 - Existing object-backed detail/edit pages still require navigation from their list. They use temporary `/detail` and `/edit` paths; milestone 4 will implement stable IDs and reload hydration. Object params are stripped from URLs, not from in-app state.
-- Greeting playback, PWA installation, offline handling, complete per-module verification, and real-iPhone validation remain in PWA_PLAN.md.
+- PWA installation, offline handling, complete per-module verification, and real-iPhone validation remain in PWA_PLAN.md. Greeting audio is intentionally excluded at the user's request.
 
 ## Platform boundaries
 
 Vite prefers `.web.*`, translates the two Metro image requires in app source, and aliases only the exact `react-native` import to a web facade. That facade re-exports React Native Web and supplies an Alert dialog with preserved callbacks. Native builds retain their real date picker, image picker, PDF share module and greeting players. Existing native dependency versions were not changed.
 
 `BottomTabNavigator.web.js` preserves the native tab/stack structure with web-specific bar sizing and a hidden not-found destination. Keep route additions synchronized with the native navigator and `web/linking.js`. Tests cover direct form routing, not-found routing and omission of record objects from URLs.
+
+## iPhone Safari boundaries
+
+- File sharing and printing are browser-controlled. Web Share needs HTTPS, a direct user gesture and file capability; if Safari cannot attach the PDF, FeDairy opens the PDF viewer and directs the user to its Share menu to save or send it. Safari may block a new tab after an asynchronous share failure, so the fallback requires another explicit tap.
+- Safari may offer the camera/photo library in its own chooser, but FeDairy cannot force a specific chooser. HEIC is rejected with a JPEG suggestion until real-device conversion is verified.
+- The web Add control supports pointer/touch dragging and stores its position in localStorage. Haptic vibration is omitted. Pull-to-refresh is a touch gesture; keyboard avoidance uses `visualViewport` and still needs a real-device check.

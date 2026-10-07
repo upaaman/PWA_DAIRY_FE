@@ -291,7 +291,7 @@ const BillPreviewModal = ({
                     resizeMode="contain"
                   />
                   <View style={styles.signatureLine} />
-                  <Text style={styles.signatureTitle}>Authorized Signature</Text>
+                  <Text style={styles.signatureTitle}>Dairy Seal</Text>
                   <Text style={styles.signatureOrg}>{BRAND.name}</Text>
                 </View>
               </View>

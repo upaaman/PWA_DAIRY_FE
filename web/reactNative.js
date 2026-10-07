@@ -1,4 +1,6 @@
 export * from 'react-native-web';
+export { default as KeyboardAvoidingView } from '../src/components/KeyboardAvoidingView.web';
+export { default as RefreshControl } from '../src/components/RefreshControl.web';
 // RN Web's Alert is a no-op. Preserve native button callbacks with an accessible browser dialog.
 export const Alert = {
   alert(title, message, buttons = [{ text: 'OK' }], options = {}) {

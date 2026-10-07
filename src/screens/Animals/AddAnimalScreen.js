@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: 112,
   },
   saveButton: {
     marginTop: spacing.md,

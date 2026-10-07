@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: 112,
   },
   identityCard: {
     padding: spacing.md,

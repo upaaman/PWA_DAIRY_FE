@@ -16,6 +16,12 @@ export default function AppDatePicker({
   containerStyle,
 }) {
   const id = useId();
+  const handleDateChange = event => {
+    const input = event.target;
+    if (!input.value || !input.validity.valid) return;
+    const [year, month, day] = input.value.split('-').map(Number);
+    onChange(new Date(year, month - 1, day));
+  };
   return (
     <View style={[styles.container, containerStyle]}>
       {label && (
@@ -45,12 +51,8 @@ export default function AppDatePicker({
           border: `1px solid ${error ? '#c53f51' : '#dfe8d8'}`,
           borderRadius: 16,
         }}
-        onChange={event => {
-          const input = event.target;
-          if (!input.value || !input.validity.valid) return;
-          const [year, month, day] = input.value.split('-').map(Number);
-          onChange(new Date(year, month - 1, day));
-        }}
+        onChange={handleDateChange}
+        onInput={handleDateChange}
       />
       {error && (
         <span

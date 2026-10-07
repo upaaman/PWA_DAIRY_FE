@@ -21,7 +21,14 @@
  *   object so the edit form can pre-populate instantly.)
  */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { get } from '../../api/decentralizedWrapper';
 import AppCard from '../../components/AppCard';
@@ -31,10 +38,19 @@ import Loading from '../../components/Loading';
 import EmptyState from '../../components/EmptyState';
 import TappablePhoto from '../../components/TappablePhoto';
 import colors from '../../constants/colors';
-import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
+import {
+  borderRadius,
+  fontSize,
+  fontWeight,
+  spacing,
+} from '../../constants/appConstants';
 import { formatDateString } from '../../utils/date';
 import { formatCurrency, formatLiters } from '../../utils/format';
-import { RANGE_KEYS, getDateRangeForKey, toQueryDateRange } from '../../utils/dateRanges';
+import {
+  RANGE_KEYS,
+  getDateRangeForKey,
+  toQueryDateRange,
+} from '../../utils/dateRanges';
 import { ANIMALS_ROUTES } from '../../navigation/routes';
 import {
   getAnimalIcon,
@@ -88,7 +104,6 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       const response = await get(
         `/animal/get/${animalId}?startDate=${startDate}&endDate=${endDate}`,
       );
-      console.log(response,'res')
       setAnimal(response);
     } catch (err) {
       setAnimalError(err);
@@ -123,21 +138,15 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     [navigation],
   );
 
-
   useLayoutEffect(() => {
     navigation.setOptions({
       title: animal?.name || 'Animal Details',
-      headerRight: () => (
-        <HeaderActions onEdit={handleEdit}  />
-      ),
+      headerRight: () => <HeaderActions onEdit={handleEdit} />,
     });
   }, [navigation, animal, handleEdit]);
 
   const records = useMemo(() => animal?.milkProductionList || [], [animal]);
-  const expenses = useMemo(
-    () => animal?.expenseRecordOfAnimal || [],
-    [animal],
-  );
+  const expenses = useMemo(() => animal?.expenseRecordOfAnimal || [], [animal]);
 
   // Lineage from the same payload: `mother` is a single animal (or null),
   // `childAnimals` a list (or null). Self-references are dropped — the
@@ -156,13 +165,15 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     return children.filter(child => child && child.id !== animal.id);
   }, [animal]);
   const totalProduction = useMemo(
-    () => records.reduce((sum, record) => sum + Number(record.quantity || 0), 0),
+    () =>
+      records.reduce((sum, record) => sum + Number(record.quantity || 0), 0),
     [records],
   );
 
   // Prefer the totals the animal-details API already computes, falling back
   // to a client-side sum when they aren't present.
-  const totalMilkProduced = Number(animal?.totalMilkProduced || 0) || totalProduction;
+  const totalMilkProduced =
+    Number(animal?.totalMilkProduced || 0) || totalProduction;
 
   const totalExpense = useMemo(
     () =>
@@ -171,15 +182,16 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
     [animal, expenses],
   );
 
-
-  
   // const chartData = useMemo(
   //   () => bucketByDay(records, range.startDate, range.endDate),
   //   [records, range.startDate, range.endDate],
   // );
-  
-  const shiftBreakdown = useMemo(() => computeShiftBreakdown(records), [records]);
-  
+
+  const shiftBreakdown = useMemo(
+    () => computeShiftBreakdown(records),
+    [records],
+  );
+
   const historyRecords = useMemo(
     () =>
       [...records].sort((a, b) => {
@@ -188,9 +200,12 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
         }
         return (b.productionDate || '').localeCompare(a.productionDate || '');
       }),
-      [records],
-    );
-    const avgMilkPerDay =historyRecords.length > 0 ? (totalMilkProduced / historyRecords.length)*2 : 0;
+    [records],
+  );
+  const avgMilkPerDay =
+    historyRecords.length > 0
+      ? (totalMilkProduced / historyRecords.length) * 2
+      : 0;
 
   // Only show the full-screen loader on the first load. When the animal is
   // already loaded (e.g. user switched the date range), keep the existing
@@ -204,9 +219,7 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       <EmptyState
         icon="⚠️"
         title="Couldn't load animal"
-        message={
-          animalError?.message || 'This animal could not be found.'
-        }
+        message={animalError?.message || 'This animal could not be found.'}
         actionLabel="Retry"
         onActionPress={loadAnimal}
       />
@@ -243,7 +256,7 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       <View style={styles.identityRow}>
         <Text style={styles.name}>{animal.name || 'Unnamed'}</Text>
         <View style={styles.idBadge}>
-          <Text style={styles.idBadgeText}>#{animalId||"Aman"}</Text>
+          <Text style={styles.idBadgeText}>#{animalId || animal.id}</Text>
         </View>
       </View>
 
@@ -263,9 +276,22 @@ const AnimalDetailsScreen = ({ navigation, route }) => {
       <AppCard style={styles.section}>
         <Text style={styles.sectionTitle}>Details</Text>
         <DetailRow label="Breed" value={animal.breed} />
-        {animal.dateOfBirth &&<DetailRow label="Date of Birth" value={formatDateString(animal.dateOfBirth)} />}
-        {animal.dateOfPurchase && <DetailRow label="Purchase Date" value={formatDateString(animal.dateOfPurchase)} />}
-        <DetailRow label="Purchase Price" value={formatCurrency(animal.purchasePrice)} />
+        {animal.dateOfBirth && (
+          <DetailRow
+            label="Date of Birth"
+            value={formatDateString(animal.dateOfBirth)}
+          />
+        )}
+        {animal.dateOfPurchase && (
+          <DetailRow
+            label="Purchase Date"
+            value={formatDateString(animal.dateOfPurchase)}
+          />
+        )}
+        <DetailRow
+          label="Purchase Price"
+          value={formatCurrency(animal.purchasePrice)}
+        />
         {animal.notes ? <DetailRow label="Notes" value={animal.notes} /> : null}
       </AppCard>
 
@@ -435,7 +461,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingBottom: spacing.xxxl,
+    paddingBottom: 112,
   },
   refreshingBar: {
     flexDirection: 'row',

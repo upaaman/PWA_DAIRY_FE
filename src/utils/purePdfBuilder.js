@@ -5,7 +5,7 @@
  * with zero native dependencies or external packages.
  *
  * Generates high-fidelity payment bills for EiiE Dairyfarm, complete with the
- * real logo in the header and the authorised signature above the sign-off
+ * real logo in the header and the dairy seal above the sign-off
  * line. The artwork is embedded as image XObjects; the pixel data ships
  * pre-deflated in src/assets/billBrandImages.js (see
  * scripts/buildBillBrandAssets.js) so nothing has to be compressed here.
@@ -63,7 +63,7 @@ const ROW_HEIGHT = 18;
 const FIRST_PAGE_TABLE_START_Y = 582;
 const CONTINUATION_TABLE_START_Y = 770;
 // Space reserved for the Total row + Amount/Payment summary cards +
-// footer/signature block (see the footer code below).
+// footer/seal block (see the footer code below).
 const FOOTER_BLOCK_HEIGHT = 250;
 // Right edge of the printable area — the brand block is right-aligned to it.
 const CONTENT_RIGHT = 559;
@@ -86,8 +86,8 @@ const getArtwork = key => {
 // the source aspect ratio.
 const LOGO_HEIGHT = 40;
 const CONTINUATION_LOGO_HEIGHT = 18;
-// Rendered height of the signature sitting above the sign-off line.
-const SIGNATURE_HEIGHT = 56;
+// Rendered height of the dairy seal sitting above the sign-off line.
+const SEAL_HEIGHT = 56;
 
 /**
  * Image XObject dictionary for a pre-deflated 8-bit RGB image.
@@ -201,14 +201,15 @@ export const generatePdfBase64 = billData => {
     }
     drawImage('LogoImg', x, y, height * (logo.width / logo.height), height);
   };
-  // The authorised signature, sitting on top of the sign-off line.
-  const drawSignature = (bottomY, height, right = 550) => {
-    const signature = getArtwork('signature');
-    if (!signature || !signature.width || !signature.height) {
+  // The dairy seal, sitting on top of the sign-off line. The legacy asset key
+  // remains `signature` so existing native and browser bundle data stays stable.
+  const drawSeal = (bottomY, height, right = 550) => {
+    const seal = getArtwork('signature');
+    if (!seal || !seal.width || !seal.height) {
       return;
     }
-    const width = height * (signature.width / signature.height);
-    drawImage('SignatureImg', right - width, bottomY, width, height);
+    const width = height * (seal.width / seal.height);
+    drawImage('SealImg', right - width, bottomY, width, height);
   };
 
   // Full brand header + title/meta + party details — page 1 only.
@@ -401,18 +402,18 @@ export const generatePdfBase64 = billData => {
 
   currentY -= 110;
 
-  // Footer & Signature
+  // Footer & seal
   setStrokeColor(0.796, 0.835, 0.882);
   drawLine(36, currentY, 559, currentY);
 
   drawText('F3', 10, 36, currentY - 18, 'Thank you for your continued support!', 0.075, 0.306, 0.180);
   drawText('F1', 8, 36, currentY - 30, 'Your contribution helps us deliver fresh and quality dairy products.', 0.278, 0.333, 0.412);
 
-  // Signature line, with the real signature resting on it
+  // Sign-off line, with the dairy seal resting on it
   setStrokeColor(0.200, 0.255, 0.333);
   drawLine(430, currentY - 28, 550, currentY - 28);
-  drawSignature(currentY - 28, SIGNATURE_HEIGHT);
-  drawText('F2', 8, 442, currentY - 38, 'Authorized Signature', 0.059, 0.090, 0.165);
+  drawSeal(currentY - 28, SEAL_HEIGHT);
+  drawText('F2', 8, 504, currentY - 38, 'Dairy Seal', 0.059, 0.090, 0.165);
   drawText('F1', 7.5, 452, currentY - 48, BRAND.name, 0.392, 0.455, 0.545);
 
   // Decorative green bottom stripe
@@ -440,15 +441,15 @@ export const generatePdfBase64 = billData => {
 
   // Brand artwork. Declared as resources on every page (harmless — a reader
   // only draws what the content stream references) so the header logo,
-  // continuation header logo and footer signature can all use them without
+  // continuation header logo and footer seal can all use them without
   // having to know which page they landed on.
   const logoImage = getArtwork('logo');
-  const signatureImage = getArtwork('signature');
+  const sealImage = getArtwork('signature');
   const logoImageId = logoImage ? nextId++ : 0;
-  const signatureImageId = signatureImage ? nextId++ : 0;
+  const sealImageId = sealImage ? nextId++ : 0;
   const xObjectResources = [
     logoImageId ? `/LogoImg ${logoImageId} 0 R` : null,
-    signatureImageId ? `/SignatureImg ${signatureImageId} 0 R` : null,
+    sealImageId ? `/SealImg ${sealImageId} 0 R` : null,
   ]
     .filter(Boolean)
     .join(' ');
@@ -478,9 +479,9 @@ export const generatePdfBase64 = billData => {
   if (logoImageId) {
     objects[logoImageId] = `${imageXObjectDict(logoImage)}\nstream\n${logoImage.decoded}\nendstream`;
   }
-  if (signatureImageId) {
-    objects[signatureImageId] =
-      `${imageXObjectDict(signatureImage)}\nstream\n${signatureImage.decoded}\nendstream`;
+  if (sealImageId) {
+    objects[sealImageId] =
+      `${imageXObjectDict(sealImage)}\nstream\n${sealImage.decoded}\nendstream`;
   }
 
   let pdfString = '%PDF-1.4\n';

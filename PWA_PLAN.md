@@ -1,7 +1,7 @@
 # FeDairy PWA migration plan
 
 Audit date: 6 October 2026 (Asia/Kolkata)
-Status: milestone 2 browser foundation implemented and running locally; production API CORS and native runtime/device checks remain open.
+Status: milestone 2 browser foundation is in place; dashboard and animal flows are implemented and checked locally. Production API CORS and real-device checks remain open.
 
 ## Objective and boundaries
 
@@ -139,10 +139,12 @@ Exit: a browser foundation with working navigation and a representative form, no
 
 ### 3 — Dashboard and animals
 
-- [ ] Dashboard ranges, totals, and cards; animal active/inactive lists and details.
-- [ ] Add/edit animal validation, optional purchase price, imageUrl and photo upload/display.
-- [ ] Direct detail/edit URLs, related animal navigation, retry/not-found handling.
-- [ ] Verify iPhone-sized layout and upload failure/cancellation; use test records for writes.
+- [x] Dashboard ranges, totals, and cards; animal list and detail screens use the shared API/data hooks and were checked at 390px.
+- [x] Add/edit animal validations and optional purchase price stay shared; browser photo upload posts the `file` part to `/upload` and saves its returned `url` as `imageUrl`.
+- [x] Animal detail/edit routes hydrate by ID; edit submits only changed fields, and the photo opens in the full-screen preview.
+- [ ] Related-animal navigation and explicit retry/not-found states still need focused checks.
+- [x] Check add, edit, details, and dashboard layouts at 390 × 844; verify form dates and optional blank purchase price against a temporary localhost API fixture.
+- [ ] Verify upload failure/cancellation and real iPhone Safari behavior. HEIC is clearly rejected with a JPEG-sharing suggestion; test an actual iPhone photo before release.
 
 ### 4 — Production, purchase, and sales
 
@@ -160,12 +162,12 @@ Exit: a browser foundation with working navigation and a representative form, no
 
 This is the largest milestone; split employees/salaries from the other modules into two prompts if needed.
 
-### 6 — PDF delivery, greeting, and browser polish
+### 6 — PDF delivery and Safari polish (greeting excluded)
 
-- [ ] Seller/customer PDF preview, download/open/share, real seal and multipage verification.
-- [ ] Greeting playback with user-gesture fallback and successful-playback one-hour cooldown.
-- [ ] Finish modal focus, touch/keyboard, responsive widths, safe areas and missing adapters.
-- [ ] Verify real iPhone Safari behavior for media/files; record any remaining device limitations.
+- [x] Seller/customer PDF download/open/share uses the shared PDF builder and embedded dairy seal; QA PDF rendered and seal checked.
+- [ ] Greeting audio is excluded at the user's explicit direction; do not implement it in the PWA.
+- [x] Add browser fallbacks for draggable Add buttons, list pull-to-refresh, and keyboard viewport avoidance; omit vibration feedback where Safari provides no dependable web equivalent.
+- [ ] Verify file sharing, Save to Files, keyboard and touch behavior on a real iPhone Safari/Home Screen install.
 
 ### 7 — Installability and offline/update handling
 
@@ -205,6 +207,42 @@ Pending inputs can wait until relevant: friend's iOS version for device testing,
 - [MDN PWA installation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable) and [offline operation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Offline_and_background_operation): install metadata and service-worker responsibilities.
 
 
+## Milestone 6 progress record — 7 October 2026
+
+### Delivered
+
+- Seller and customer bill exports use the existing pure-JavaScript PDF builder in the browser, so totals, transaction ordering, pagination, logo and dairy seal stay shared with native output. The PDF footer and in-app preview now label the stamp as “Dairy Seal.”
+- Desktop browsers download a named PDF. iPhone/iPad Safari opens the generated PDF in its built-in viewer so the user can use Share > Save to Files or Print. The Share action sends the PDF file and receipt text only when `navigator.canShare({ files })` confirms support and `navigator.share` is called directly from the user action. Otherwise it opens/downloads the PDF and explains the Safari handoff; after asynchronous share failure the user gets a fresh Open PDF action in a dialog.
+- Extracted receipt-text formatting into a shared utility so the browser adapter does not pull `react-native-share` into the web bundle. The native service still uses the same formatter and share library.
+- Added a web draggable Add button using pointer events and localStorage; it keeps the existing saved edge/vertical position behavior and hides while an editable field has focus. Safari vibration feedback is omitted because there is no dependable browser haptics API.
+- Replaced React Native Web's no-op refresh control with a touch pull-down fallback and its no-op keyboard avoidance wrapper with a visual-viewport inset adapter.
+- No greeting audio code or asset playback was added.
+- Generated a synthetic one-page customer QA PDF and rendered it: the header logo, bill values and dairy seal are visible and legible. The seller builder path was also generated in memory. `npm run web:build` and the Android Metro production bundle pass; focused ESLint has zero errors (11 style/bitwise warnings). `git diff --check` passes. No automated test suite was run.
+
+### Browser limits and remaining checks
+
+- Web Share is HTTPS-only in supporting browsers, requires transient user activation, and file support must be capability-checked. Safari/browser versions that cannot share PDF files fall back to opening the PDF and ask the user to use the browser Share sheet. [MDN Web Share API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API).
+- Saving to Files and printing are completed in Safari's native PDF viewer, not by a guaranteed web download prompt. Direct Save As dialogs, silent printing and a fixed share-target list are not available to a PWA.
+- Real iPhone Safari/Home Screen checks remain required for file handoff, visual keyboard resizing, pull-to-refresh and pointer/touch dragging. No iPhone device test is claimed.
+- The web bundle now includes PDF artwork and is about 1.05 MB minified (~400 kB gzip); route-level PDF code splitting is a future performance optimization.
+
+## Milestone 3 progress record — 6 October 2026
+
+### Delivered
+
+- Dashboard and animal list/details reuse the shared screens and API hooks; the green dashboard cards and bottom-tab layout were manually checked at 390 × 844.
+- Add and edit animal routes hydrate from stable IDs. Existing validations and API payloads stay unchanged, including optional purchase price (`null` when blank) and delta-only edit requests.
+- Added a web photo picker with JPG/PNG/WEBP selection, 1600px maximum dimension, JPEG quality 0.85 conversion, a 3 MB limit, busy/error states, and full-screen image preview. Browser upload sends a real `File` in multipart field `file` to the existing `POST /upload` and uses the returned `{ url }` as `imageUrl`.
+- Corrected web date input handling so its visible values are also included in the existing ISO-date API fields. Native date picking is unchanged.
+- Checked Add, Edit, Details, Dashboard, and image preview at 390 × 844. Manually completed add → upload → details → edit using a temporary localhost-only fixture; a second synthetic record confirmed both date values and blank optional purchase price. No production records or uploads were used.
+- The add/edit/detail/list scroll areas leave space above the fixed browser tab bar.
+- `npm run web:build`: pass. Focused ESLint: zero errors (existing inline-style and nested-component warnings remain). `git diff --check`: pass. No automated test suite was run in this milestone.
+
+### Remaining
+
+- Test upload errors/cancellation, real iPhone Safari HEIC/orientation and touch behavior, and production API upload only after backend CORS is configured. Production API CORS is still the previously observed blocker; the temporary local fixture does not validate deployed access.
+- Continue with milestone 4 after remaining milestone 2 native-device checks are completed.
+
 ## Milestone 2 implementation record — 6 October 2026
 
 ### Delivered
@@ -214,7 +252,7 @@ Pending inputs can wait until relevant: friend's iOS version for device testing,
 - Existing native-stack works in the browser spike; no replacement stack library was needed.
 - Browser date input preserves local date fields and min/max; web Alert uses a native HTML dialog with existing button callbacks. Vite facade isolates this from native Alert.
 - Web API environment configuration, optional example environment and a localhost-only development proxy. Native API config is untouched.
-- Minimal explicit unavailable adapters keep the native image picker/share libraries out of the bundle. Photo upload work remains milestone 3; PDF file delivery remains milestone 6. Existing screens render but are not certified feature-complete.
+- Minimal adapters keep native image picker/share libraries out of the bundle; browser photo upload is now implemented in milestone 3, while PDF file delivery remains milestone 6.
 - Removed a pre-existing unused `bucketByDay` import from AnimalDetailsScreen: the export did not exist and prevented Vite dependency scanning. No behavior depended on this import.
 - Fixed React Native Web animation cleanup's `global` reference with a browser-only `globalThis` build definition.
 
@@ -232,11 +270,11 @@ Pending inputs can wait until relevant: friend's iOS version for device testing,
 ### Remaining limitations and next step
 
 - Configure backend CORS for the deployment origin or a production same-origin proxy before sharing a hosted build. No backend policy was changed here. Authentication/data isolation still needs verification.
-- Stable ID hydration for object-backed details/edits remains in milestones 3–5. Temporary detail/edit URLs do not survive refresh with their record data; list and Add routes do.
+- Stable ID hydration for details/edits is now implemented for animals; other object-backed modules still need the later milestone 4–5 work.
 - No manifest/service worker/install prompt, greeting, upload processing, or PDF export added in this foundation step.
 - Production bundle has a size warning (~825 kB JS / 234 kB gzip); route splitting is a later optimization. RN Web logs deprecation warnings for existing shadow/pointerEvents props.
 - Local Node 25.2.1 produces React Native engine warnings; use a supported Node 22.13+ (22.x) or 24.3+ (24.x) for reproducible development.
 - Native emulator launch and real iPhone Safari checks are not claimed by the build checks.
-- Next: milestone 3 (dashboard/animals plus real web photo uploads), followed by object-backed production/purchase/sales route hydration in milestone 4.
+- Next: finish native runtime/device checks and the remaining upload/real-phone checks, then implement production/purchase/sales route hydration in milestone 4.
 
 Local run instructions and API behavior: `web/README.md`. The current dev server is http://127.0.0.1:5173; restart with `npm run web:dev` if it stops.
