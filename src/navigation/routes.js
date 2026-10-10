@@ -9,7 +9,6 @@
 // Bottom tab route names
 export const TABS = {
   HOME: 'HomeTab',
-  ANIMALS: 'AnimalsTab',
   PRODUCTION: 'ProductionTab',
   PURCHASE: 'PurchaseTab',
   SALES: 'SalesTab',
@@ -54,6 +53,7 @@ export const SALES_ROUTES = {
 // More stack
 export const MORE_ROUTES = {
   MENU: 'MoreMenu',
+  ANIMALS: 'Animals',
   PROFILE: 'Profile',
   SETTINGS: 'Settings',
   SELLER: 'Seller',

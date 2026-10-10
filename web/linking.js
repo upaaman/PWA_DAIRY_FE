@@ -22,15 +22,6 @@ export const linking = {
     screens: {
       WebNotFound: '*',
       [TABS.HOME]: '',
-      [TABS.ANIMALS]: {
-        initialRouteName: A.LIST,
-        screens: {
-          [A.LIST]: 'animals',
-          [A.ADD]: 'animals/new',
-          [A.DETAILS]: 'animals/:animalId',
-          [A.EDIT]: 'animals/:animalId/edit',
-        },
-      },
       [TABS.PRODUCTION]: {
         initialRouteName: P.LIST,
         screens: {
@@ -65,6 +56,15 @@ export const linking = {
         initialRouteName: M.MENU,
         screens: {
           [M.MENU]: 'more',
+          [M.ANIMALS]: {
+            initialRouteName: A.LIST,
+            screens: {
+              [A.LIST]: 'animals',
+              [A.ADD]: 'animals/new',
+              [A.DETAILS]: 'animals/:animalId',
+              [A.EDIT]: 'animals/:animalId/edit',
+            },
+          },
           [M.PROFILE]: 'profile',
           [M.SETTINGS]: 'settings',
           [V.LIST]: 'sellers',

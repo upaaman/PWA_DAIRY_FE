@@ -1,7 +1,7 @@
 /**
  * AnimalsNavigator
  *
- * Stack for the "Animals" tab: List -> Add / Details.
+ * Animal management stack: List -> Add / Details.
  */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

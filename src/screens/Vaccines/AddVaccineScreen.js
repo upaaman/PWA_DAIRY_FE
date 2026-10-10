@@ -162,7 +162,7 @@ const AddVaccineScreen = ({ navigation }) => {
       <EmptyState
         icon="🐄"
         title="No animals available"
-        message="Add an animal in the Animals tab before recording a vaccine."
+        message="Add an animal from More → Animals before recording a vaccine."
       />
     );
   }

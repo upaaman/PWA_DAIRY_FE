@@ -32,7 +32,7 @@ Proposed additions (not created): browser entry under `web/`, web-only Vite conf
 - `package.json`: bare React Native 0.87.1, React 19.2.3, React Navigation 7; no web build scripts, React DOM, React Native Web, manifest, or service worker configured.
 - `App.tsx`: SafeAreaProvider wraps RootNavigator.
 - `src/navigation/RootNavigator.js`: NavigationContainer has no linking configuration.
-- `src/navigation/BottomTabNavigator.js`: Home, Animals, Production, Purchase, Sales, and More; five nested native-stack navigators.
+- `src/navigation/BottomTabNavigator.js`: Home, Production, Purchase, Sales, and More; animal management lives inside the More stack.
 - `src/navigation/MoreNavigator.js`: sellers, customers, their billing flows, employees/salaries/transactions, expenses, breeding, vaccines, Profile, and Settings. These are real migration scope, not just the main tabs.
 
 ### High-reuse candidates

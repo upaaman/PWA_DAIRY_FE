@@ -1,12 +1,13 @@
 /**
  * MoreNavigator
  *
- * Stack for the "More" tab: Menu -> Profile / Settings / Sellers /
- * Customers / Employees / Expenses / Breeding / Vaccine.
+ * Stack for the "More" tab: Menu -> Animals / Profile / Settings /
+ * Sellers / Customers / Employees / Expenses / Breeding / Vaccine.
  */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MoreMenuScreen from '../screens/More/MoreMenuScreen';
+import AnimalsNavigator from './AnimalsNavigator';
 import ProfileScreen from '../screens/More/ProfileScreen';
 import SettingsScreen from '../screens/More/SettingsScreen';
 import SellerScreen from '../screens/More/SellerScreen';
@@ -50,6 +51,11 @@ const MoreNavigator = () => (
       name={MORE_ROUTES.MENU}
       component={MoreMenuScreen}
       options={{ title: 'More' }}
+    />
+    <Stack.Screen
+      name={MORE_ROUTES.ANIMALS}
+      component={AnimalsNavigator}
+      options={{ headerShown: false }}
     />
     <Stack.Screen
       name={MORE_ROUTES.PROFILE}

@@ -265,7 +265,7 @@ const EditBreedingScreen = ({ navigation, route }) => {
 
         <Text style={styles.hintText}>
           Only animals with the CHILD status are listed. Link the calf once it
-          has been added in the Animals tab.
+          has been added in More → Animals.
         </Text>
 
         <AppInput

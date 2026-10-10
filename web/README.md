@@ -34,7 +34,7 @@ Production hosting must serve `index.html` for application routes such as `/prod
 
 ## Foundation scope
 
-Available now: browser app entry, all six tabs, mapped URLs, not-found page, native-stack web navigation, green responsive shell, browser dates and real dialogs, shared dashboard and animal flows, local API configuration/proxy, and browser animal-photo upload.
+Available now: browser app entry, five main tabs, mapped URLs, not-found page, native-stack web navigation, green responsive shell, browser dates and real dialogs, shared dashboard and animal flows, local API configuration/proxy, and browser animal-photo upload. Animals is available from More, and its `/animals...` URLs remain supported.
 
 Current boundaries and remaining work:
 

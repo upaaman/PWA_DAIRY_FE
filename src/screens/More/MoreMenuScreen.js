@@ -12,9 +12,9 @@ import { BRAND } from '../../constants/brand';
 import { borderRadius, fontSize, fontWeight, spacing } from '../../constants/appConstants';
 import {
   CUSTOMER_ROUTES,
+  MORE_ROUTES,
   EMPLOYEE_ROUTES,
   EXPENSE_ROUTES,
-  MORE_ROUTES,
   SELLER_ROUTES,
   BREEDING_ROUTES,
   VACCINE_ROUTES,
@@ -26,6 +26,7 @@ const MENU_SECTIONS = [
     items: [
       { label: 'Sellers', subtitle: 'Milk sellers & accounts', icon: '🚚', route: SELLER_ROUTES.LIST },
       { label: 'Customers', subtitle: 'Milk customers & accounts', icon: '👥', route: CUSTOMER_ROUTES.LIST },
+      { label: 'Animals', subtitle: 'Animal records & details', icon: '🐄', route: MORE_ROUTES.ANIMALS },
       { label: 'Employee', subtitle: 'Salaries & pay records', icon: '🧑‍🌾', route: EMPLOYEE_ROUTES.SCREEN },
       { label: 'Expense', subtitle: 'Feed, medicine & misc', icon: '🧾', route: EXPENSE_ROUTES.LIST },
       { label: 'Breeding', subtitle: 'Breeding & calving records', icon: '🤰', route: BREEDING_ROUTES.LIST },

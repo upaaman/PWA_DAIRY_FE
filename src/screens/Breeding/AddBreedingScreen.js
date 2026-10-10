@@ -206,7 +206,7 @@ const AddBreedingScreen = ({ navigation }) => {
       <EmptyState
         icon="🐄"
         title="No female animals available"
-        message="Add a female animal in the Animals tab before recording a breeding."
+        message="Add a female animal from More → Animals before recording a breeding."
       />
     );
   }

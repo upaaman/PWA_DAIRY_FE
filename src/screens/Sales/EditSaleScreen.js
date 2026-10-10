@@ -9,7 +9,7 @@
  *   { quantity, shift, amount, customerId, saleDate, rate, animalType }
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { get, patch } from '../../api/decentralizedWrapper';
 import AppButton from '../../components/AppButton';
 import AppInput from '../../components/AppInput';
@@ -18,12 +18,17 @@ import AppDatePicker from '../../components/AppDatePicker';
 import EmptyState from '../../components/EmptyState';
 import Loading from '../../components/Loading';
 import colors from '../../constants/colors';
-import { fontSize, fontWeight, spacing } from '../../constants/appConstants';
+import { spacing } from '../../constants/appConstants';
 import { SHIFT_OPTIONS } from '../../constants/enums';
 import { TYPE_OPTIONS } from '../Animals/animalMeta';
 import { toISODateString } from '../../utils/date';
-import { formatCurrency } from '../../utils/format';
 import { getMilkRateForType } from '../../utils/milkRates';
+
+const calculateAmount = (quantity, rate) => {
+  if (!String(quantity).trim() || !String(rate).trim()) return null;
+  const amount = Number(quantity) * Number(rate);
+  return Number.isFinite(amount) ? amount : null;
+};
 
 // Backend returns "yyyy-MM-dd" (UTC); parse the parts directly so the
 // local Date used by the picker/`toISODateString` stays on the same day.
@@ -49,7 +54,6 @@ const EditSaleScreen = ({ navigation, route }) => {
     saleDate: sale ? parseDateString(sale.saleDate) : new Date(),
     quantity: sale ? String(sale.quantity) : '',
     rate: sale ? String(sale.rate) : '',
-    amount: sale ? String(sale.amount) : '',
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -130,10 +134,6 @@ const EditSaleScreen = ({ navigation, route }) => {
     if (!form.rate.trim() || Number.isNaN(rateValue) || rateValue <= 0) {
       nextErrors.rate = 'Please enter a valid positive rate.';
     }
-    const amountValue = Number(form.amount);
-    if (!form.amount.trim() || Number.isNaN(amountValue) || amountValue <= 0) {
-      nextErrors.amount = 'Please enter a valid positive amount.';
-    }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -146,7 +146,7 @@ const EditSaleScreen = ({ navigation, route }) => {
     const payload = {
       quantity: Number(form.quantity),
       shift: form.shift,
-      amount: Number(form.amount),
+      amount: calculateAmount(form.quantity, form.rate),
       customerId: form.customerId,
       saleDate: toISODateString(form.saleDate),
       rate: Number(form.rate),
@@ -202,10 +202,7 @@ const EditSaleScreen = ({ navigation, route }) => {
     );
   }
 
-  const previewAmount =
-    form.quantity && form.rate
-      ? formatCurrency(Number(form.quantity) * Number(form.rate))
-      : null;
+  const computedAmount = calculateAmount(form.quantity, form.rate);
 
   return (
     <KeyboardAvoidingView
@@ -271,19 +268,11 @@ const EditSaleScreen = ({ navigation, route }) => {
 
         <AppInput
           label="Amount (₹) *"
-          placeholder="E.g. 169"
-          value={form.amount}
-          onChangeText={value => setField('amount', value)}
+          placeholder="Calculated from quantity × rate"
+          value={computedAmount === null ? '' : String(computedAmount)}
+          editable={false}
           keyboardType="numeric"
-          error={errors.amount}
         />
-
-        {previewAmount ? (
-          <View style={styles.previewRow}>
-            <Text style={styles.previewLabel}>Computed Amount</Text>
-            <Text style={styles.previewValue}>{previewAmount}</Text>
-          </View>
-        ) : null}
 
         <AppButton
           title="Save Changes"
@@ -304,22 +293,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxxl,
-  },
-  previewRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  previewLabel: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-  previewValue: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold,
-    color: colors.primary,
   },
   saveButton: {
     marginTop: spacing.sm,
